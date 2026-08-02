@@ -1,0 +1,4110 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DARKBEAT v3.0 </title>
+    <style>
+        /* 全局基础重置与暗色主题 */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-user-select: none;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+
+        body {
+            background-color: #080911;
+            color: #e2e8f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* 移动端主外框 */
+        #app {
+            width: 100%;
+            max-width: 430px;
+            height: 100vh;
+            max-height: 920px;
+            background-color: #0f1220;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            box-shadow: 0 0 35px rgba(0,0,0,0.95);
+            overflow: hidden;
+        }
+
+        /* 顶部导航 */
+        .header-nav {
+            height: 52px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 12px;
+            border-bottom: 1px solid #1a1f36;
+            background-color: #0b0d18;
+            z-index: 10;
+        }
+
+        .brand-title {
+            font-weight: 800;
+            font-size: 16px;
+            color: #ffffff;
+            letter-spacing: 1px;
+        }
+        .brand-title span {
+            font-size: 11px;
+            color: #38bdf8;
+            font-weight: normal;
+            margin-left: 2px;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 4px;
+        }
+
+        .nav-tab-btn {
+            color: #8c9ba5;
+            font-size: 12px;
+            cursor: pointer;
+            padding: 5px 8px;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+
+        .nav-tab-btn.active {
+            color: #ffffff;
+            background: #8b5cf6;
+            font-weight: bold;
+        }
+
+        /* 视图页面容器 */
+        .view-container {
+            flex: 1;
+            position: relative;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .view-page {
+            display: none;
+            flex-direction: column;
+            width: 100%;
+            height: 100%;
+            padding: 16px;
+            position: absolute;
+            top: 0;
+            left: 0;
+            overflow-y: auto;
+        }
+
+        .view-page.active {
+            display: flex;
+        }
+
+        /* 1. 首页模式选择列表 */
+        .mode-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 4px;
+            margin-bottom: 16px;
+        }
+
+        .mode-item {
+            background: #161b33;
+            border: 1px solid #232a4d;
+            border-radius: 12px;
+            padding: 14px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .mode-item.selected, .mode-item:active {
+            background: #1f264a;
+            border-color: #8b5cf6;
+            box-shadow: 0 0 15px rgba(139, 92, 246, 0.35);
+        }
+
+        .mode-title {
+            font-size: 15px;
+            font-weight: bold;
+            color: #ffffff;
+        }
+
+        .mode-desc {
+            font-size: 12px;
+            color: #718096;
+            margin-top: 3px;
+        }
+
+        .start-btn {
+            background: linear-gradient(135deg, #7c3aed, #ec4899, #f97316);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 15px;
+            font-size: 17px;
+            font-weight: bold;
+            text-align: center;
+            cursor: pointer;
+            margin-top: auto;
+            box-shadow: 0 4px 18px rgba(236, 72, 153, 0.35);
+        }
+
+        .warning-text {
+            text-align: center;
+            color: #4a5568;
+            font-size: 11px;
+            margin-top: 8px;
+        }
+
+        /* 2. 自定义模式设置 */
+        .setting-group {
+            background: #161b33;
+            border-radius: 10px;
+            padding: 12px 14px;
+            margin-bottom: 10px;
+        }
+
+        .setting-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .setting-label {
+            font-size: 13px;
+            color: #cbd5e1;
+        }
+
+        .counter-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-step {
+            width: 30px;
+            height: 30px;
+            background: #232a4d;
+            border: 1px solid #333d6b;
+            color: white;
+            border-radius: 6px;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        /* 3. 游戏主界面 */
+        .game-header {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+        .game-stats-bar {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            color: #8c9ba5;
+            align-items: center;
+            height: 32px;
+        }
+
+        /* 图1/图2要求：卡牌发牌动画层与顶部小卡牌样式完全一致 */
+        .card-sequence {
+            display: flex;
+            gap: 6px;
+            overflow-x: auto;
+            padding: 6px 2px;
+            scrollbar-width: none;
+            min-height: 48px;
+            align-items: center;
+        }
+        .card-sequence::-webkit-scrollbar {
+            display: none;
+        }
+
+        .seq-item {
+            min-width: 32px;
+            height: 40px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: bold;
+            flex-shrink: 0;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+            transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        /* 状态 1：已完成显示灰色 */
+        .seq-item.status-completed {
+            background: #1e293b !important;
+            color: #475569 !important;
+            border: 1px solid #334155 !important;
+            box-shadow: none !important;
+            opacity: 0.6;
+        }
+
+        /* 状态 2：未完成 / 选中 显示亮彩色底色 (图1/图2样式) */
+        /* 同时覆盖 status-upcoming 和 status-active，已完成用上面的 !important 覆盖 */
+        .seq-item.cat-WARMUP {
+            background: #38bdf8;
+            color: #fff;
+        }
+        .seq-item.cat-ACTION {
+            background: #2563eb;
+            color: #fff;
+        }
+        .seq-item.cat-CHALLENGE {
+            background: #7c3aed;
+            color: #fff;
+        }
+        .seq-item.cat-OPPORTUNITY {
+            background: #10b981;
+            color: #fff;
+        }
+        .seq-item.cat-EVENT {
+            background: #f59e0b;
+            color: #fff;
+        }
+        .seq-item.cat-PUNISHMENT {
+            background: #ef4444;
+            color: #fff;
+        }
+        .seq-item.cat-ENDING {
+            background: #ec4899;
+            color: #fff;
+        }
+
+        /* 状态 3：正在执行高亮选中（保留彩色底，只加缩放和白边光晕） */
+        .seq-item.status-active {
+            transform: scale(1.15);
+            border: 2px solid #ffffff !important;
+            box-shadow: 0 0 12px rgba(255,255,255,0.8) !important;
+            z-index: 2;
+            opacity: 1;
+        }
+
+        /* 发牌动画飞行节点 */
+        .flying-card-node {
+            position: absolute;
+            width: 32px;
+            height: 40px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: bold;
+            color: #fff;
+            z-index: 99;
+            pointer-events: none;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.6);
+            transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        /* 卡牌显示区域 */
+        .card-display {
+            flex: 1;
+            border-radius: 16px;
+            padding: 18px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            box-shadow: inset 0 0 25px rgba(0,0,0,0.5);
+            overflow: hidden;
+            /* 保持外层不溢出 */
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            min-height: 0;
+            /* 新增：flex 子项可收缩 */
+        }
+
+        .card-display.enter-active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .card-type-WARMUP {
+            background: linear-gradient(180deg, #132e42 0%, #0a1724 100%);
+            border: 1px solid #1d4ed8;
+        }
+        .card-type-ACTION {
+            background: linear-gradient(180deg, #102a4a 0%, #081426 100%);
+            border: 1px solid #2563eb;
+        }
+        .card-type-CHALLENGE {
+            background: linear-gradient(180deg, #281545 0%, #120921 100%);
+            border: 1px solid #7c3aed;
+        }
+        .card-type-OPPORTUNITY {
+            background: linear-gradient(180deg, #0e3a28 0%, #051a12 100%);
+            border: 1px solid #059669;
+        }
+        .card-type-EVENT {
+            background: linear-gradient(180deg, #3d2b0f 0%, #1c1306 100%);
+            border: 1px solid #d97706;
+        }
+        .card-type-PUNISHMENT {
+            background: linear-gradient(180deg, #421313 0%, #1f0808 100%);
+            border: 1px solid #dc2626;
+        }
+        .card-type-ENDING {
+            background: linear-gradient(180deg, #451233 0%, #210818 100%);
+            border: 1px solid #db2777;
+        }
+
+        .card-top-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .card-tag {
+            font-size: 13px;
+            letter-spacing: 1px;
+            font-weight: bold;
+        }
+
+        .card-bpm-badge {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+            color: #38bdf8;
+        }
+
+        .card-title {
+            font-size: 22px;
+            font-weight: bold;
+            color: #ffffff;
+            margin-bottom: 8px;
+        }
+
+        .card-desc {
+            font-size: 14px;
+            line-height: 1.5;
+            color: #cbd5e1;
+            margin-bottom: 14px;
+            white-space: pre-wrap;
+            overflow-y: auto;
+            /* 新增：内容过长可滚动 */
+            max-height: 42vh;
+            /* 新增：限制最大高度，给底部按钮留空间 */
+            flex: 1 1 auto;
+            /* 新增：占剩余空间 */
+            min-height: 48px;
+            /* 新增：至少显示几行 */
+            -webkit-overflow-scrolling: touch;
+            /* 移动端惯性滚动 */
+            padding-right: 4px;
+            /* 滚动条不贴边 */
+        }
+
+        /* 图3要求：正计时/倒计时样式优化 */
+        .timer-display-box {
+            background: rgba(0, 0, 0, 0.45);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 14px;
+            padding: 24px 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin-top: auto;
+            margin-bottom: 14px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .timer-big-num {
+            font-size: 48px;
+            font-weight: 900;
+            color: #ffffff;
+            letter-spacing: 2px;
+            font-family: monospace;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
+        }
+
+        .timer-progress-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 4px;
+            background: #38bdf8;
+            width: 0%;
+            transition: width 0.1s linear;
+        }
+
+        /* Canvas 画布 (图4要求：优化从左至右BPM节奏视觉与样式) */
+        .canvas-container {
+            width: 100%;
+            height: 150px;
+            background: rgba(0,0,0,0.4);
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.08);
+            margin-top: auto;
+            margin-bottom: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .beat-info-bar {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            font-size: 12px;
+        }
+
+        .beat-badge {
+            background: rgba(0,0,0,0.6);
+            padding: 6px 12px;
+            border-radius: 8px;
+            color: #e2e8f0;
+            font-weight: bold;
+        }
+
+        /* 局内控制按钮 */
+        .card-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-game {
+            flex: 1;
+            padding: 14px;
+            border-radius: 10px;
+            border: none;
+            font-size: 16px;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-complete {
+            background: #16a34a;
+        }
+        .btn-complete:active {
+            background: #15803d;
+        }
+
+        .btn-giveup {
+            background: #dc2626;
+            position: relative;
+        }
+
+        .btn-giveup.disabled {
+            background: #334155 !important;
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-giveup-progress {
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 0%;
+            background: rgba(0,0,0,0.6);
+            transition: width 0.05s linear;
+        }
+
+        .beg-button {
+            background: linear-gradient(135deg, #ea580c, #f97316);
+            color: white;
+            font-size: 12px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(249, 115, 22, 0.4);
+        }
+
+        .beg-button:disabled {
+            background: #334155 !important;
+            opacity: 0.5;
+            cursor: not-allowed;
+            box-shadow: none !important;
+        }
+
+        /* 选择型动态按钮 */
+        .choice-button-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: auto;
+            margin-bottom: 12px;
+            width: 100%;
+            flex-shrink: 0;
+            /* 防止被挤压 */
+        }
+
+        .btn-choice {
+            background: #1e293b;
+            border: 1px solid #334155;
+            color: white;
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s;
+        }
+        .btn-choice:active {
+            background: #334155;
+            transform: scale(0.98);
+        }
+
+        /* 4. 任务管理 */
+        .task-manager-header {
+            display: flex;
+            gap: 6px;
+            overflow-x: auto;
+            padding-bottom: 8px;
+            margin-bottom: 12px;
+            scrollbar-width: none;
+        }
+        .task-manager-header::-webkit-scrollbar {
+            display: none;
+        }
+
+        .type-filter-chip {
+            padding: 6px 12px;
+            background: #161b33;
+            border-radius: 16px;
+            font-size: 12px;
+            color: #94a3b8;
+            white-space: nowrap;
+            cursor: pointer;
+        }
+
+        .type-filter-chip.active {
+            background: #8b5cf6;
+            color: white;
+            font-weight: bold;
+        }
+
+        .task-card-item {
+            background: #161b33;
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 4px solid #94a3b8;
+            cursor: pointer;
+        }
+
+        .task-card-info h4 {
+            font-size: 14px;
+            color: #fff;
+            margin-bottom: 3px;
+        }
+        .task-card-info p {
+            font-size: 11px;
+            color: #718096;
+        }
+
+        .task-card-ops {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 36px;
+            height: 20px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider-round {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #334155;
+            transition: .3s;
+            border-radius: 20px;
+        }
+
+        .slider-round:before {
+            position: absolute;
+            content: "";
+            height: 14px;
+            width: 14px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .3s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider-round {
+            background-color: #16a34a;
+        }
+        input:checked + .slider-round:before {
+            transform: translateX(16px);
+        }
+
+        .btn-icon {
+            background: none;
+            border: none;
+            color: #94a3b8;
+            font-size: 15px;
+            cursor: pointer;
+            padding: 4px;
+        }
+
+        /* 5. 模态框与求饶弹窗 */
+        .modal-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.85);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            padding: 16px;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-box {
+            background: #13172b;
+            border: 1px solid #232a4d;
+            border-radius: 14px;
+            width: 100%;
+            max-height: 90%;
+            overflow-y: auto;
+            padding: 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            box-shadow: 0 10px 35px rgba(0,0,0,0.9);
+        }
+
+        .beg-modal-box {
+            background: #111424;
+            border-radius: 16px;
+            width: 90%;
+            padding: 22px 18px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 14px;
+            border: 1px solid #232a4d;
+        }
+
+        .beg-modal-title-red {
+            color: #f87171;
+            font-size: 17px;
+            font-weight: bold;
+            line-height: 1.4;
+        }
+        .beg-modal-title-green {
+            color: #4ade80;
+            font-size: 17px;
+            font-weight: bold;
+            line-height: 1.4;
+        }
+        .beg-modal-title-yellow {
+            color: #fbbf24;
+            font-size: 17px;
+            font-weight: bold;
+            line-height: 1.4;
+        }
+
+        .beg-modal-desc {
+            color: #94a3b8;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .spinner {
+            width: 36px;
+            height: 36px;
+            border: 4px solid rgba(255,255,255,0.1);
+            border-left-color: #f97316;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 8px 0;
+        }
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .form-group label {
+            font-size: 12px;
+            color: #94a3b8;
+        }
+
+        .form-control {
+            background: #090b14;
+            border: 1px solid #232a4d;
+            padding: 10px;
+            border-radius: 6px;
+            color: white;
+            font-size: 13px;
+        }
+
+        /* 6. 结算与回顾视图 */
+        .summary-title {
+            font-size: 22px;
+            font-weight: bold;
+            text-align: center;
+            margin-top: 10px;
+            color: #ffffff;
+        }
+        .summary-sub {
+            text-align: center;
+            color: #94a3b8;
+            font-size: 12px;
+            margin-top: 4px;
+            margin-bottom: 18px;
+        }
+
+        .stat-table {
+            background: #161b33;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 16px;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 14px;
+            border-bottom: 1px solid #1f264a;
+            font-size: 13px;
+        }
+        .stat-row:last-child {
+            border-bottom: none;
+        }
+
+        .bottom-switch-bar {
+            height: 42px;
+            background: #0b0d18;
+            border-top: 1px solid #1a1f36;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            font-size: 12px;
+            color: #8c9ba5;
+        }
+
+        .switch-label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* 历史战报与战报卡片列表 */
+        .history-card {
+            background: #161b33;
+            border: 1px solid #232a4d;
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .history-card-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #8b5cf6;
+            font-weight: bold;
+        }
+
+        .history-card-body {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #cbd5e1;
+        }
+
+        .history-card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 4px;
+            font-size: 11px;
+            color: #64748b;
+        }
+
+        .btn-xs {
+            background: #232a4d;
+            color: white;
+            border: 1px solid #333d6b;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            cursor: pointer;
+        }
+
+        /* 战报回顾卡片 */
+        .review-item {
+            background: #161b33;
+            border-radius: 8px;
+            padding: 10px 12px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 4px solid #94a3b8;
+        }
+
+        .review-status-done {
+            color: #4ade80;
+            font-weight: bold;
+            font-size: 12px;
+        }
+        .review-status-skip {
+            color: #f87171;
+            font-weight: bold;
+            font-size: 12px;
+        }
+        .review-status-punish {
+            color: #ef4444;
+            font-weight: bold;
+            font-size: 12px;
+        }
+        .review-status-unfinish {
+            color: #64748b;
+            font-size: 12px;
+        }
+        /* ===== 选择型选项编辑 UI 优化 ===== */
+        .opt-row {
+            background: #090b14;
+            border: 1px solid #232a4d;
+            border-radius: 10px;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 4px;
+        }
+        /* ===== 动作组编辑 UI ===== */
+        .action-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            align-items: center;
+            background: #0d1020;
+            padding: 8px;
+            border-radius: 6px;
+            margin-bottom: 4px;
+            border-left: 3px solid #8b5cf6;
+        }
+        .action-row.fail {
+            border-left-color: #ef4444;
+        }
+        .action-list {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            min-height: 8px;
+        }
+        .opt-section-title.action {
+            color: #a78bfa;
+        }
+        .opt-section-title.fail-action {
+            color: #f87171;
+        }
+        .btn-sort {
+            background: none;
+            border: none;
+            color: #94a3b8;
+            font-size: 12px;
+            cursor: pointer;
+            padding: 2px 4px;
+        }
+        .btn-sort:active {
+            color: #fff;
+        }
+
+        .opt-section {
+            border-top: 1px dashed #2a3355;
+            padding-top: 8px;
+            margin-top: 2px;
+        }
+        .opt-section-title {
+            font-size: 11px;
+            font-weight: bold;
+            margin-bottom: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .opt-section-title.cond {
+            color: #a78bfa;
+        }
+        .opt-section-title.chain {
+            color: #fbbf24;
+        }
+        .opt-section-title.effect {
+            color: #38bdf8;
+        }
+        .opt-section-title.msg {
+            color: #94a3b8;
+        }
+        .cond-row, .chain-row {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            background: #0d1020;
+            padding: 6px;
+            border-radius: 6px;
+            margin-bottom: 4px;
+        }
+        .btn-mini {
+            background: #232a4d;
+            border: 1px solid #333d6b;
+            color: #e2e8f0;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        .btn-mini:active {
+            background: #334155;
+        }
+        .btn-mini.danger {
+            color: #f87171;
+            border-color: #7f1d1d;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="app">
+        <div class="header-nav">
+            <div class="brand-title">
+                DARKBEAT <span>v3.0</span>
+            </div>
+            <div class="nav-tabs">
+                <div class="nav-tab-btn active" onclick="switchView('page-home')">
+                    首页
+                </div>
+                <div class="nav-tab-btn" onclick="switchView('page-history')">
+                    战报
+                </div>
+                <div class="nav-tab-btn" onclick="switchView('page-manage')">
+                    卡牌
+                </div>
+                <div class="nav-tab-btn" onclick="switchView('page-settings')">
+                    设置
+                </div>
+            </div>
+        </div>
+
+        <div class="view-container">
+
+            <!-- 1. 首页 -->
+            <div id="page-home" class="view-page active">
+                <div class="mode-list">
+                    <div class="mode-item selected" onclick="selectMode('NORMAL', this)">
+                        <div>
+                            <div class="mode-title">
+                                普通局
+                            </div>
+                            <div class="mode-desc">
+                                抽取 24 张卡牌
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mode-item" onclick="selectMode('CHALLENGE', this)">
+                        <div>
+                            <div class="mode-title">
+                                挑战局
+                            </div>
+                            <div class="mode-desc">
+                                抽取 44 张卡牌
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mode-item" onclick="selectMode('ENDURANCE', this)">
+                        <div>
+                            <div class="mode-title">
+                                耐力局
+                            </div>
+                            <div class="mode-desc">
+                                抽取 64 张卡牌
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mode-item" onclick="selectMode('ENDLESS', this)">
+                        <div>
+                            <div class="mode-title">
+                                无尽模式
+                            </div>
+                            <div class="mode-desc">
+                                开局 1 张热身，无尽补牌
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mode-item" onclick="selectMode('RANDOM', this)">
+                        <div>
+                            <div class="mode-title">
+                                随机模式
+                            </div>
+                            <div class="mode-desc">
+                                5 种模式随机挑一种
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mode-item" onclick="selectMode('CUSTOM', this)">
+                        <div>
+                            <div class="mode-title">
+                                自定义游戏模式
+                            </div>
+                            <div class="mode-desc">
+                                直接设定各类卡牌具体张数
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="start-btn" onclick="startGame()">开始游戏</button>
+                <div class="warning-text">
+                    限制级游戏，含成人内容，未满 18 岁禁止进入
+                </div>
+            </div>
+
+            <!-- 自定义模式配置 -->
+            <div id="page-custom-settings" class="view-page">
+                <h3 style="margin-bottom:14px; text-align:center;">自定义游戏模式设定</h3>
+
+                <div class="setting-group">
+                    <div class="setting-row">
+                        <span class="setting-label">热身牌张数 (不设限，优先优先置于队首)</span>
+                        <div class="counter-control">
+                            <div class="btn-step" onclick="adjustCustomCount('warmup', -1)">
+                                -
+                            </div>
+                            <span id="cfg-warmup" style="font-weight:bold; min-width:24px; text-align:center;">2</span>
+                            <div class="btn-step" onclick="adjustCustomCount('warmup', 1)">
+                                +
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="setting-group">
+                    <div class="setting-row">
+                        <span class="setting-label">动作牌张数</span>
+                        <div class="counter-control">
+                            <div class="btn-step" onclick="adjustCustomCount('action', -1)">
+                                -
+                            </div>
+                            <span id="cfg-action" style="font-weight:bold; min-width:24px; text-align:center;">10</span>
+                            <div class="btn-step" onclick="adjustCustomCount('action', 1)">
+                                +
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="setting-group">
+                    <div class="setting-row">
+                        <span class="setting-label">挑战牌张数</span>
+                        <div class="counter-control">
+                            <div class="btn-step" onclick="adjustCustomCount('challenge', -1)">
+                                -
+                            </div>
+                            <span id="cfg-challenge" style="font-weight:bold; min-width:24px; text-align:center;">5</span>
+                            <div class="btn-step" onclick="adjustCustomCount('challenge', 1)">
+                                +
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="setting-group">
+                    <div class="setting-row">
+                        <span class="setting-label">机会牌张数</span>
+                        <div class="counter-control">
+                            <div class="btn-step" onclick="adjustCustomCount('chance', -1)">
+                                -
+                            </div>
+                            <span id="cfg-chance" style="font-weight:bold; min-width:24px; text-align:center;">3</span>
+                            <div class="btn-step" onclick="adjustCustomCount('chance', 1)">
+                                +
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="setting-group">
+                    <div class="setting-row">
+                        <span class="setting-label">事件牌张数</span>
+                        <div class="counter-control">
+                            <div class="btn-step" onclick="adjustCustomCount('event', -1)">
+                                -
+                            </div>
+                            <span id="cfg-event" style="font-weight:bold; min-width:24px; text-align:center;">2</span>
+                            <div class="btn-step" onclick="adjustCustomCount('event', 1)">
+                                +
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display:flex; gap:12px; margin-top:auto;">
+                    <button class="btn-game" style="background:#232a4d;" onclick="switchView('page-home')">返回</button>
+                    <button class="btn-game" style="background:#8b5cf6;" onclick="startGameFromCustom()">保存并开始</button>
+                </div>
+            </div>
+
+            <!-- 历史战报页面 -->
+            <div id="page-history" class="view-page">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                    <h3>过往战报历史</h3>
+                    <button style="background:#dc2626; color:white; border:none; padding:6px 12px; border-radius:6px; font-weight:bold; cursor:pointer; font-size:12px;" onclick="clearHistoryLogs()">一键清空</button>
+                </div>
+                <div id="historyListContainer" style="flex:1; overflow-y:auto;"></div>
+            </div>
+
+            <!-- 设置页面 -->
+            <div id="page-settings" class="view-page">
+                <h3 style="margin-bottom:14px; text-align:center;">系统高级参数设置</h3>
+
+                <div class="setting-group">
+                    <div class="form-group">
+                        <label>求饶初始同意概率 (%)</label>
+                        <input type="number" class="form-control" id="setBegInit" value="1" min="0" max="100">
+                    </div>
+                </div>
+
+                <div class="setting-group">
+                    <div class="form-group">
+                        <label>每游玩 1 分钟增加求饶同意概率 (%)</label>
+                        <input type="number" class="form-control" id="setBegMinInc" value="2" min="0" max="100">
+                    </div>
+                </div>
+
+                <div class="setting-group">
+                    <div class="form-group">
+                        <label>每完成 1 张卡牌增加求饶同意概率 (%)</label>
+                        <input type="number" class="form-control" id="setBegTaskInc" value="1" min="0" max="100">
+                    </div>
+                </div>
+
+                <div class="setting-group">
+                    <div class="form-group">
+                        <label>求饶延迟追加牌张数</label>
+                        <input type="number" class="form-control" id="setBegDelayCount" value="3" min="1" max="10">
+                    </div>
+                </div>
+
+                <div class="setting-group">
+                    <div class="form-group">
+                        <label>求饶延迟最后一张出现【结局牌】基础概率 (%)</label>
+                        <input type="number" class="form-control" id="setBegDelayEndProb" value="50" min="0" max="100">
+                    </div>
+                </div>
+
+                <div class="setting-group">
+                    <div class="form-group">
+                        <label>节奏任务速度比率 (默认 100%)</label>
+                        <input type="number" class="form-control" id="setRhythmSpeedRatio" value="100" min="10" max="300">
+                    </div>
+                </div>
+
+                <div class="setting-group">
+                    <div class="form-group">
+                        <label>计时任务时长比率 (默认 100%)</label>
+                        <input type="number" class="form-control" id="setTimerDurationRatio" value="100" min="10" max="300">
+                    </div>
+                </div>
+
+                <button class="btn-game" style="background:#8b5cf6; margin-top:auto;" onclick="saveSystemSettings()">保存设置</button>
+            </div>
+
+            <!-- 2. 游戏主界面 -->
+            <div id="page-game" class="view-page">
+                <div class="game-header">
+                    <div class="game-stats-bar">
+                        <span id="gameProgressText">1 / 24</span>
+                        <button id="begBtn" class="beg-button" onclick="triggerBeg()">求求你让我射</button>
+                        <span id="gameTimerText">00:00</span>
+                    </div>
+                    <div class="card-sequence" id="cardSeqBar"></div>
+                </div>
+
+                <div id="activeCardDisplay" class="card-display card-type-WARMUP">
+                    <div class="card-top-info">
+                        <span id="cardTag" class="card-tag">WARMUP</span>
+                        <span id="cardBpmBadge" class="card-bpm-badge" style="display:none;">120 BPM</span>
+                    </div>
+                    <div id="cardTitle" class="card-title">
+                        标题
+                    </div>
+                    <div id="cardDesc" class="card-desc">
+                        描述
+                    </div>
+
+                    <!-- 倒计时/正计时框 (图3样式) -->
+                    <div class="timer-display-box" id="timerBox" style="display:none;">
+                        <div class="timer-big-num" id="timerNum">
+                            00:30.00
+                        </div>
+                        <div class="timer-progress-bar" id="timerProgressBar"></div>
+                    </div>
+
+                    <!-- Canvas 画布 (图4样式) -->
+                    <div class="canvas-container" id="canvasWrap">
+                        <canvas id="beatCanvas"></canvas>
+                    </div>
+
+                    <div class="beat-info-bar" id="beatInfoBar">
+                        <span class="beat-badge" id="beatSpeedText">每秒 2.0 次</span>
+                        <span class="beat-badge" id="beatCountText">0 / 0</span>
+                    </div>
+
+                    <div id="choiceContainer" class="choice-button-group" style="display:none;"></div>
+
+                    <div class="card-actions" id="standardActions">
+                        <button class="btn-game btn-complete" id="btnComplete" onclick="completeCurrentCard()">开始</button>
+                        <button class="btn-game btn-giveup" id="btnGiveup">
+                            <div class="btn-giveup-progress" id="giveupProgress"></div>
+                            <span style="position:relative; z-index:2;" id="giveupText">长按放弃</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. 任务管理 -->
+            <div id="page-manage" class="view-page">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                    <h3>卡牌任务管理系统</h3>
+                    <button style="background:#8b5cf6; color:white; border:none; padding:6px 12px; border-radius:6px; font-weight:bold; cursor:pointer; font-size:12px;" onclick="openTaskModal()">+ 新建卡牌</button>
+                </div>
+
+                <div class="task-manager-header">
+                    <div class="type-filter-chip active" onclick="filterTaskCategory('ALL', this)">
+                        全部
+                    </div>
+                    <div class="type-filter-chip" onclick="filterTaskCategory('WARMUP', this)">
+                        热身
+                    </div>
+                    <div class="type-filter-chip" onclick="filterTaskCategory('ACTION', this)">
+                        动作/挑战
+                    </div>
+                    <div class="type-filter-chip" onclick="filterTaskCategory('OPPORTUNITY', this)">
+                        机会
+                    </div>
+                    <div class="type-filter-chip" onclick="filterTaskCategory('EVENT', this)">
+                        事件
+                    </div>
+                    <div class="type-filter-chip" onclick="filterTaskCategory('PUNISHMENT', this)">
+                        惩罚
+                    </div>
+                    <div class="type-filter-chip" onclick="filterTaskCategory('ENDING', this)">
+                        结局
+                    </div>
+                </div>
+
+                <div id="taskListContainer" style="flex:1; overflow-y:auto;"></div>
+            </div>
+
+            <!-- 4. 结算视图 -->
+            <div id="page-summary" class="view-page">
+                <div class="summary-title">
+                    游戏结束
+                </div>
+                <div class="summary-sub">
+                    这样就满足了？我看你还意犹未尽呢
+                </div>
+
+                <div class="stat-table">
+                    <div class="stat-row">
+                        <span>经过时间</span>
+                        <span id="sumTime">00:00</span>
+                    </div>
+                    <div class="stat-row">
+                        <span>本局总抽卡张数</span>
+                        <span id="sumTotalDrawn">0</span>
+                    </div>
+                    <div class="stat-row">
+                        <span>已完成卡牌张数</span>
+                        <span id="sumCompleted">0</span>
+                    </div>
+                    <div class="stat-row">
+                        <span>未完成卡牌张数</span>
+                        <span id="sumUncompleted">0</span>
+                    </div>
+                    <div class="stat-row">
+                        <span>额外抽卡张数</span>
+                        <span id="sumExtra">0</span>
+                    </div>
+                    <div class="stat-row">
+                        <span>放弃/处罚次数</span>
+                        <span id="sumPunish">0</span>
+                    </div>
+                </div>
+
+                <div style="display:flex; flex-direction:column; gap:10px; margin-top:auto;">
+                    <button class="btn-game" style="background:#38bdf8;" onclick="openGameReviewView()">本局回顾</button>
+                    <div style="display:flex; gap:10px;">
+                        <button class="btn-game" style="background:#232a4d;" onclick="switchView('page-home')">回首页</button>
+                        <button class="btn-game" style="background:#8b5cf6;" onclick="startGame()">再来一次</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 5. 本局回顾视图 -->
+            <div id="page-review" class="view-page">
+                <h3 style="margin-bottom:12px; text-align:center;" id="reviewViewTitle">本局抽取卡牌回顾</h3>
+                <div id="reviewListContainer" style="flex:1; overflow-y:auto; margin-bottom:12px;"></div>
+                <div style="display:flex; gap:10px; margin-top:auto;">
+                    <button class="btn-game" style="background:#232a4d;" id="reviewBtnBackSummary" onclick="switchView('page-summary')">返回结算页面</button>
+                    <button class="btn-game" style="background:#8b5cf6;" onclick="switchView('page-home')">退出到主页面</button>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="bottom-switch-bar">
+            <label class="switch-label">
+                <input type="checkbox" id="chkAutoStart"> 自动开始 (倒计时3秒)
+            </label>
+            <label class="switch-label">
+                <input type="checkbox" id="chkAudio" checked> 节拍音效
+            </label>
+        </div>
+
+        <!-- 模态框区 -->
+        <div class="modal-overlay" id="taskModal">
+            <div class="modal-box">
+                <h3 id="modalTaskTitle">新建卡牌</h3>
+                <input type="hidden" id="mTaskId" value="">
+
+                <div class="form-group">
+                    <label>卡牌分类</label>
+                    <select class="form-control" id="mTaskCategory">
+                        <option value="WARMUP">热身牌 (淡蓝色)</option>
+                        <option value="ACTION">动作/挑战牌 (深蓝色/紫色)</option>
+                        <option value="OPPORTUNITY">机会牌 (绿色)</option>
+                        <option value="EVENT">事件牌 (棕黄色)</option>
+                        <option value="PUNISHMENT">惩罚牌 (红色)</option>
+                        <option value="ENDING">结局牌 (粉紫色)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>任务模式</label>
+                    <select class="form-control" id="mTaskMode" onchange="toggleTaskModeFields()">
+                        <option value="RHYTHM">节奏任务 (BPM + 拍数)</option>
+                        <option value="TIMER">计时任务 (倒计时/正计时)</option>
+                        <option value="CHOICE">选择型任务 (独立逻辑设置)</option>
+                        <option value="TARGET">目标任务 (照指示做)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>卡牌标题</label>
+                    <input type="text" class="form-control" id="mTaskName" placeholder="例：按住马眼撸">
+                </div>
+
+                <div class="form-group">
+                    <label>任务指示内容</label>
+                    <textarea class="form-control" id="mTaskDesc" rows="3" placeholder="填写具体的动作指导..."></textarea>
+                </div>
+
+                <div id="rhythmFields" class="form-group">
+                    <label>BPM 速度与维持总拍数</label>
+                    <div style="display:flex; gap:8px;">
+                        <input type="number" class="form-control" id="mTaskBpm" placeholder="BPM(如120)" value="120">
+                        <input type="number" class="form-control" id="mTaskBeats" placeholder="总拍数(如60)" value="60">
+                    </div>
+                </div>
+
+                <div id="timerFields" class="form-group" style="display:none;">
+                    <label>计时模式与时长 (秒)</label>
+                    <div style="display:flex; gap:8px;">
+                        <select class="form-control" id="mTaskTimerType" style="flex:1;">
+                            <option value="DOWN">倒计时</option>
+                            <option value="UP">正计时</option>
+                        </select>
+                        <input type="number" class="form-control" id="mTaskSec" style="flex:1;" placeholder="秒数(如30)" value="30">
+                    </div>
+                </div>
+
+                <div id="choiceFields" class="form-group" style="display:none;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                        <label style="font-size:13px; color:#e2e8f0;">选项（动作组模式）</label>
+                        <button class="btn-mini" style="background:#8b5cf6; border-color:#8b5cf6;" onclick="addChoiceOptionRow()">+ 添加选项</button>
+                    </div>
+                    <div style="font-size:11px; color:#64748b; margin-bottom:8px; line-height:1.4;">
+                        每个选项 = 条件 + 成功动作组（按顺序执行）+ 失败动作组（可选）
+                    </div>
+                    <div id="choiceOptionsContainer" style="display:flex; flex-direction:column; gap:12px;"></div>
+                </div>
+
+                <div style="display:flex; gap:10px; margin-top:10px;">
+                    <button class="btn-game" style="background:#232a4d;" onclick="closeTaskModal()">取消</button>
+                    <button class="btn-game" style="background:#8b5cf6;" onclick="saveCustomTask()">保存</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-overlay" id="thinkingModal">
+            <div class="beg-modal-box">
+                <div style="font-size:18px; font-weight:bold; color:#fff;">
+                    让我想想你配不配射...
+                </div>
+                <div class="spinner"></div>
+                <div class="beg-modal-desc">
+                    系统评估中，请保持耐性...
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-overlay" id="refusalModal">
+            <div class="beg-modal-box">
+                <div class="beg-modal-title-red">
+                    乖乖听话，我决定好了 ——<br>这么早？给你点惩罚
+                </div>
+                <div class="beg-modal-desc">
+                    已记录额外抽卡，并强制插入一张【惩罚卡】！<br><span style="color:#f87171; font-size:12px;">（本回合求饶功能已锁定，需完成当前及惩罚任务）</span>
+                </div>
+                <button class="btn-game" style="background:#dc2626; width:100%;" onclick="closeRefusalModal()">接受惩罚</button>
+            </div>
+        </div>
+
+        <div class="modal-overlay" id="approvalModal">
+            <div class="beg-modal-box">
+                <div class="beg-modal-title-green">
+                    乖乖听话，我决定好了 ——<br>求得够了，给你个爽快
+                </div>
+                <div class="beg-modal-desc">
+                    系统已批准！即将为您直接导入【结局卡】！
+                </div>
+                <button class="btn-game" style="background:#16a34a; width:100%;" onclick="closeApprovalModal()">进入结局</button>
+            </div>
+        </div>
+
+        <div class="modal-overlay" id="delayBegModal">
+            <div class="beg-modal-box">
+                <div class="beg-modal-title-yellow">
+                    乖乖听话，我决定好了 ——<br>还不够硬，再坚持一下！
+                </div>
+                <div class="beg-modal-desc" id="delayBegDesc">
+                    额外为你追加 X 张任务卡！加油坚持住！
+                </div>
+                <button class="btn-game" style="background:#d97706; width:100%;" onclick="closeDelayBegModal()">继续坚持</button>
+            </div>
+        </div>
+
+        <div class="modal-overlay" id="alertModal">
+            <div class="beg-modal-box">
+                <div class="beg-modal-title-yellow" id="alertTitle">
+                    提示
+                </div>
+                <div class="beg-modal-desc" id="alertBody">
+                    内容
+                </div>
+                <button class="btn-game" style="background:#8b5cf6; width:100%;" onclick="document.getElementById('alertModal').classList.remove('active')">确定</button>
+            </div>
+        </div>
+
+        <div class="modal-overlay" id="previewModal">
+            <div class="modal-box" style="padding:0; background:transparent; border:none; box-shadow:none;">
+                <div id="previewCardContainer" class="card-display enter-active" style="min-height:380px;"></div>
+                <button class="btn-game" style="background:#232a4d; margin-top:12px; width:100%;" onclick="document.getElementById('previewModal').classList.remove('active')">关闭预览</button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        /* ----------------------------------------------------
+         * 1. 默认数据与持久化配置
+         * ---------------------------------------------------- */
+
+        /* =========================================================
+ * DARKBEAT v3.0  -  代码结构分区
+ * 1. CONFIG（常量）
+ * 2. STORAGE（持久化 + 迁移）
+ * 3. STATE（运行时状态）
+ * 4. 后面按功能模块：UI / Game / Choice / Beg / History / TaskManager
+ * ========================================================= */
+
+        /* ========== 1. CONFIG 常量 ========== */
+        const CONFIG = {
+            VERSION: '3.0',
+            STORAGE: {
+                CARDS: 'DARKBEAT_CUSTOM_CARDS_V6',
+                SETTINGS: 'DARKBEAT_SETTINGS_V6',
+                HISTORY: 'DARKBEAT_HISTORY_V6',
+                CARDS_V5: 'DARKBEAT_CUSTOM_CARDS_V5',
+                SETTINGS_V5: 'DARKBEAT_SETTINGS_V5',
+                HISTORY_V5: 'DARKBEAT_HISTORY_V5'
+            },
+            DEFAULT_SETTINGS: {
+                begInit: 1,
+                begMinInc: 0.5,
+                begTaskInc: 0.5,
+                begDelayCount: 3,
+                begDelayEndProb: 10,
+                rhythmSpeedRatio: 100,
+                timerDurationRatio: 100
+            }
+        };
+
+        const DEFAULT_CARDS = [{
+            id: 'w1',
+            category: 'WARMUP',
+            mode: 'TIMER',
+            timerType: 'DOWN',
+            title: '先脱光吧',
+            desc: '脱光全身衣服，全裸后在时间内随意玩弄身体，提升敏感度',
+            duration: 15,
+            enabled: true
+        },
+            {
+                id: 'w2',
+                category: 'WARMUP',
+                mode: 'TARGET',
+                title: '先弄硬吧',
+                desc: '慢慢抚摸使其勃起，硬了之后在时间内随意挑逗龟头',
+                enabled: true
+            },
+            {
+                id: 'a1',
+                category: 'ACTION',
+                mode: 'RHYTHM',
+                title: '按住马眼撸',
+                desc: '一手食指和中指并拢伸直按住马眼不许松开，另一手跟着节奏上下套弄',
+                bpm: 140,
+                beats: 60,
+                enabled: true
+            },
+            {
+                id: 'a2',
+                category: 'ACTION',
+                mode: 'RHYTHM',
+                title: '快速撸',
+                desc: '用你喜欢的手法跟着节奏上下快速套弄',
+                bpm: 180,
+                beats: 80,
+                enabled: true
+            },
+            {
+                id: 'a3',
+                category: 'ACTION',
+                mode: 'RHYTHM',
+                title: '龟头责·剪刀手',
+                desc: '一手握住根部把包皮往下拉，另一手比剪刀手，用指缝跟着节奏“剪”龟头',
+                bpm: 120,
+                beats: 40,
+                enabled: true
+            },
+            {
+                id: 'c1',
+                category: 'CHALLENGE',
+                mode: 'TIMER',
+                timerType: 'DOWN',
+                title: '极限边缘控射',
+                desc: '快速套弄至临界点（边缘），立刻松手忍住不许射出！',
+                duration: 30,
+                enabled: true
+            },
+            {
+                id: 'o1',
+                category: 'OPPORTUNITY',
+                mode: 'TARGET',
+                title: '泄了气的皮球',
+                desc: '停止套弄，让鸡巴完全软掉，放松肌肉。若一直硬着则接受处罚',
+                enabled: true
+            },
+            {
+                id: 'e1',
+                category: 'EVENT',
+                mode: 'CHOICE',
+                title: '色气检验联动',
+                desc: '现在的勃起硬度是否达到了 100%？',
+                options: [{
+                    text: '是的，完全坚硬',
+                    probability: 100,
+                    condOperator: 'AND',
+                    conditions: [{
+                        type: 'COMPLETED_GTE',
+                        value: 2
+                    },
+                        {
+                            type: 'PUNISH_LTE',
+                            value: 1
+                        }],
+                    successMsg: '很好，保持这种充血状态！',
+                    actions: [{
+                        type: 'NEXT',
+                        param: 1
+                    },
+                        {
+                            type: 'BPM_BOOST',
+                            value: 20,
+                            duration: 3,
+                            cat: 'ACTION'
+                        }],
+                    failActions: []
+                },
+                    {
+                        text: '还不够硬',
+                        probability: 100,
+                        actions: [ {
+                            type: 'PUNISH',
+                            param: 1
+                        }],
+                        successMsg: '软塌塌的可不行，罚抽 1 张惩罚牌醒醒神！',
+                        failActions: []
+                    },
+                    {
+                        text: '我自己加码挑战',
+                        probability: 100,
+                        condOperator: 'AND',
+                        conditions: [{
+                            type: 'TIME_GTE',
+                            value: 60
+                        }],
+                        successMsg: '勇气可嘉！先罚再赏',
+                        actions: [{
+                            type: 'PUNISH',
+                            param: 1
+                        },
+                            {
+                                type: 'DRAW',
+                                param: 1,
+                                forceCat: 'ACTION'
+                            },
+                            {
+                                type: 'BPM_BOOST',
+                                value: 30,
+                                duration: 4,
+                                cat: 'ALL'
+                            }],
+                        failActions: []
+                    }],
+                enabled: true
+            },
+            {
+                id: 'p1',
+                category: 'PUNISHMENT',
+                mode: 'RHYTHM',
+                title: '惩罚·龟头责衣物',
+                desc: '拿起内裤或粗糙布料，跟着节奏狠狠摩擦龟头敏感处',
+                bpm: 130,
+                beats: 30,
+                enabled: true
+            },
+            {
+                id: 'p2',
+                category: 'PUNISHMENT',
+                mode: 'RHYTHM',
+                title: '惩罚·用力捏蛋',
+                desc: '跟着节奏用力捏蛋蛋，每一下都要捏到有酸痛感',
+                bpm: 90,
+                beats: 15,
+                enabled: true
+            },
+            {
+                id: 'ed1',
+                category: 'ENDING',
+                mode: 'TARGET',
+                title: '自由射精·颜射',
+                desc: '现在自由撸到射精，必须射在脸上或嘴里，享受极致解脱！',
+                enabled: true
+            }];
+
+        /* ========== 2. STORAGE 安全层 ========== */
+        function safeParse(jsonStr, fallback) {
+            try {
+                if (!jsonStr) return fallback;
+                const data = JSON.parse(jsonStr);
+                return data != null ? data: fallback;
+            } catch (e) {
+                console.warn('[DARKBEAT] JSON 解析失败，使用默认值', e);
+                return fallback;
+            }
+        }
+
+        function loadCustomCards() {
+            try {
+                let raw = localStorage.getItem(CONFIG.STORAGE.CARDS);
+                if (raw) return safeParse(raw, DEFAULT_CARDS);
+
+                raw = localStorage.getItem(CONFIG.STORAGE.CARDS_V5);
+                if (raw) {
+                    const old = safeParse(raw, DEFAULT_CARDS);
+                    localStorage.setItem(CONFIG.STORAGE.CARDS, JSON.stringify(old));
+                    console.log('[DARKBEAT] 已从 V5 迁移卡牌数据到 V6');
+                    return old;
+                }
+                return DEFAULT_CARDS;
+            } catch (e) {
+                console.error('[DARKBEAT] 加载卡牌失败', e);
+                // showAlert 可能还没定义，这里先 console，后面 onload 再提示
+                return DEFAULT_CARDS;
+            }
+        }
+
+        function loadSystemSettings() {
+            try {
+                let raw = localStorage.getItem(CONFIG.STORAGE.SETTINGS);
+                if (raw) return Object.assign({}, CONFIG.DEFAULT_SETTINGS, safeParse(raw, {}));
+
+                raw = localStorage.getItem(CONFIG.STORAGE.SETTINGS_V5);
+                if (raw) {
+                    const old = Object.assign({}, CONFIG.DEFAULT_SETTINGS, safeParse(raw, {}));
+                    localStorage.setItem(CONFIG.STORAGE.SETTINGS, JSON.stringify(old));
+                    console.log('[DARKBEAT] 已从 V5 迁移设置到 V6');
+                    return old;
+                }
+                return Object.assign({}, CONFIG.DEFAULT_SETTINGS);
+            } catch (e) {
+                console.error('[DARKBEAT] 加载设置失败', e);
+                return Object.assign({}, CONFIG.DEFAULT_SETTINGS);
+            }
+        }
+
+        function loadHistoryLogs() {
+            try {
+                let raw = localStorage.getItem(CONFIG.STORAGE.HISTORY);
+                if (raw) return safeParse(raw, []);
+
+                raw = localStorage.getItem(CONFIG.STORAGE.HISTORY_V5);
+                if (raw) {
+                    const old = safeParse(raw, []);
+                    localStorage.setItem(CONFIG.STORAGE.HISTORY, JSON.stringify(old));
+                    console.log('[DARKBEAT] 已从 V5 迁移历史到 V6');
+                    return old;
+                }
+                return [];
+            } catch (e) {
+                console.error('[DARKBEAT] 加载历史失败', e);
+                return [];
+            }
+        }
+
+        /* ========== 3. STATE 运行时状态 ========== */
+        let customCards = loadCustomCards();
+        let systemSettings = loadSystemSettings();
+        let historyLogs = loadHistoryLogs();
+
+        let customCounts = {
+            warmup: 2,
+            action: 10,
+            challenge: 5,
+            chance: 3,
+            event: 2
+        };
+
+        // 局内状态
+        let currentMode = 'NORMAL';
+        let gameQueue = [];
+        let currentCardIndex = 0;
+        let gameTimer = null;
+        let secondsElapsed = 0;
+        let extraCardsDrawn = 0;
+        let punishmentCount = 0;
+        let completedCount = 0;
+        let isCardActive = false;
+        let autoStartTimer = null;
+        let cardStartTime = 0;
+        let hasBeggedThisTurn = false;
+        let hasEndingInQueue = false;
+        let activeEffects = [];
+
+        // 音频 / 画布
+        let audioCtx = null;
+        let animFrameId = null;
+        let timerInterval = null;
+        let canvas, ctx;
+
+
+
+/* ========== 启动入口 ========== */
+window.onload = function() {
+  try {
+    canvas = document.getElementById('beatCanvas');
+    ctx = canvas.getContext('2d');
+    resizeCanvas();
+
+    // 数据迁移（只执行一次）
+    migrateAllCardsToActionGroup();
+
+    // UI 初始化
+    renderTaskManager();
+    renderHistoryLogs();
+    loadSettingsToUI();
+    setupLongPressGiveup();
+
+    console.log('[DARKBEAT] v' + CONFIG.VERSION + ' 启动完成 | 卡牌数: ' + customCards.length);
+  } catch (e) {
+    console.error('[DARKBEAT] 启动失败', e);
+    alert('游戏启动异常，请刷新重试\n' + (e.message || ''));
+  }
+};
+
+        /* 批量把 localStorage 里的旧选择型选项永久改成动作组格式 */
+        function migrateAllCardsToActionGroup() {
+            try {
+                let changed = false;
+                customCards.forEach(card => {
+                    if (card.mode === 'CHOICE' && Array.isArray(card.options)) {
+                        card.options = card.options.map(o => {
+                            if (o.actions && Array.isArray(o.actions)) return o;
+                            changed = true;
+                            return migrateOptionToActionGroup(o);
+                        });
+                    }
+                });
+                if (changed) {
+                    saveCardsToStorage();
+                    console.log('[DARKBEAT] 旧选择型卡已永久迁移为动作组格式 (V6)');
+                    // 可选提示（只在首次迁移时）
+                    // showAlert('数据升级', '已自动将旧选择型卡牌升级到动作组格式，无需手动操作。');
+                }
+            } catch (e) {
+                console.error('[DARKBEAT] 迁移失败', e);
+                showAlert('数据迁移异常', '部分旧卡牌可能未完全升级，建议检查卡牌管理页。');
+            }
+        }
+
+        function resizeCanvas() {
+            if (!canvas) return;
+            const rect = canvas.parentElement.getBoundingClientRect();
+            canvas.width = rect.width;
+            canvas.height = rect.height;
+        }
+
+        function switchView(pageId) {
+            document.querySelectorAll('.view-page').forEach(p => p.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+
+            const tabs = document.querySelectorAll('.nav-tab-btn');
+            tabs[0].classList.toggle('active', pageId === 'page-home');
+            tabs[1].classList.toggle('active', pageId === 'page-history');
+            tabs[2].classList.toggle('active', pageId === 'page-manage');
+            tabs[3].classList.toggle('active', pageId === 'page-settings');
+
+            if (pageId !== 'page-game') {
+                stopCardTask();
+                if (gameTimer) clearInterval(gameTimer);
+                if (autoStartTimer) clearInterval(autoStartTimer);
+            }
+        }
+
+        function showAlert(title, body) {
+            document.getElementById('alertTitle').innerText = title;
+            document.getElementById('alertBody').innerText = body;
+            document.getElementById('alertModal').classList.add('active');
+        }
+
+        /* ----------------------------------------------------
+         * 2. 设置与数据持久化
+         * ---------------------------------------------------- */
+        function loadSettingsToUI() {
+            document.getElementById('setBegInit').value = systemSettings.begInit;
+            document.getElementById('setBegMinInc').value = systemSettings.begMinInc;
+            document.getElementById('setBegTaskInc').value = systemSettings.begTaskInc;
+            document.getElementById('setBegDelayCount').value = systemSettings.begDelayCount;
+            document.getElementById('setBegDelayEndProb').value = systemSettings.begDelayEndProb;
+            document.getElementById('setRhythmSpeedRatio').value = systemSettings.rhythmSpeedRatio;
+            document.getElementById('setTimerDurationRatio').value = systemSettings.timerDurationRatio;
+        }
+
+        function saveSystemSettings() {
+            try {
+                systemSettings.begInit = parseFloat(document.getElementById('setBegInit').value) || 1;
+                systemSettings.begMinInc = parseFloat(document.getElementById('setBegMinInc').value) || 0.5;
+                systemSettings.begTaskInc = parseFloat(document.getElementById('setBegTaskInc').value) || 0.5;
+                systemSettings.begDelayCount = parseInt(document.getElementById('setBegDelayCount').value) || 3;
+                systemSettings.begDelayEndProb = parseFloat(document.getElementById('setBegDelayEndProb').value) || 10;
+                systemSettings.rhythmSpeedRatio = parseFloat(document.getElementById('setRhythmSpeedRatio').value) || 100;
+                systemSettings.timerDurationRatio = parseFloat(document.getElementById('setTimerDurationRatio').value) || 100;
+
+                localStorage.setItem(CONFIG.STORAGE.SETTINGS, JSON.stringify(systemSettings));
+                showAlert('设置成功', '所有系统参数已保存！');
+            } catch (e) {
+                console.error('[DARKBEAT] 保存设置失败', e);
+                showAlert('保存失败', '设置无法写入：' + (e.message || '未知错误'));
+            }
+        }
+
+        /* ----------------------------------------------------
+         * 3. 模式选择与生成牌库 (热身牌自动置最前 + 无尽开局1热身)
+         * ---------------------------------------------------- */
+        function selectMode(mode, el) {
+            currentMode = mode;
+            document.querySelectorAll('.mode-item').forEach(i => i.classList.remove('selected'));
+            el.classList.add('selected');
+
+            if (mode === 'CUSTOM') {
+                switchView('page-custom-settings');
+            }
+        }
+
+        function adjustCustomCount(key, delta) {
+            customCounts[key] = Math.max(0, customCounts[key] + delta);
+            document.getElementById(`cfg-${key}`).innerText = customCounts[key];
+        }
+
+        function startGame() {
+            try {
+                if (currentMode === 'RANDOM') {
+                    const modes = ['NORMAL',
+                        'CHALLENGE',
+                        'ENDURANCE',
+                        'ENDLESS',
+                        'CUSTOM'];
+                    currentMode = modes[Math.floor(Math.random() * modes.length)];
+                }
+                buildGameQueue();
+                initGameSession();
+            } catch (e) {
+                console.error('[DARKBEAT] 开始游戏失败', e);
+                showAlert('开局失败', '无法生成牌库：' + (e.message || '未知错误') + '。请检查卡牌数据。');
+            }
+        }
+
+        function startGameFromCustom() {
+            currentMode = 'CUSTOM';
+            buildGameQueue();
+            initGameSession();
+        }
+
+        function buildGameQueue() {
+            const poolWarmup = customCards.filter(c => c.enabled !== false && c.category === 'WARMUP');
+            const poolAction = customCards.filter(c => c.enabled !== false && c.category === 'ACTION');
+            const poolChallenge = customCards.filter(c => c.enabled !== false && c.category === 'CHALLENGE');
+            const poolChance = customCards.filter(c => c.enabled !== false && c.category === 'OPPORTUNITY');
+            const poolEvent = customCards.filter(c => c.enabled !== false && c.category === 'EVENT');
+            const poolEnding = customCards.filter(c => c.enabled !== false && c.category === 'ENDING');
+
+            gameQueue = [];
+            hasEndingInQueue = false;
+            activeEffects = []; // reset effects
+
+            if (currentMode === 'ENDLESS') {
+                // 无尽模式开局只放 1 张热身，后续自动补非惩罚/非结局牌
+                if (poolWarmup.length) {
+                    gameQueue.push({
+                        cardData: getRandomItem(poolWarmup), status: 'UNFINISHED', durationSpent: 0
+                    });
+                } else {
+                    gameQueue.push({
+                        cardData: getRandomItem(poolAction.length ? poolAction: customCards), status: 'UNFINISHED', durationSpent: 0
+                    });
+                }
+            } else {
+                let numW = 2,
+                numA = 12,
+                numC = 6,
+                numCh = 3,
+                numE = 1;
+
+                if (currentMode === 'CHALLENGE') {
+                    numW = 2; numA = 22; numC = 11; numCh = 6; numE = 3;
+                }
+                if (currentMode === 'ENDURANCE') {
+                    numW = 2; numA = 32; numC = 16; numCh = 9; numE = 5;
+                }
+                if (currentMode === 'CUSTOM') {
+                    numW = customCounts.warmup;
+                    numA = customCounts.action;
+                    numC = customCounts.challenge;
+                    numCh = customCounts.chance;
+                    numE = customCounts.event;
+                }
+
+                // 选出热身牌
+                const warmups = [];
+                pushRandomCards(warmups, poolWarmup, numW);
+
+                // 选出主体牌
+                const bodyQueue = [];
+                pushRandomCards(bodyQueue, poolAction, numA);
+                pushRandomCards(bodyQueue, poolChallenge, numC);
+                pushRandomCards(bodyQueue, poolChance, numCh);
+                pushRandomCards(bodyQueue, poolEvent, numE);
+                shuffleArray(bodyQueue);
+
+                // 修改自定义游戏模式要求：热身牌一律自动优先置于牌库最前
+                const rawQueue = [...warmups,
+                    ...bodyQueue];
+
+                // 放入局内数据封装
+                rawQueue.forEach(c => gameQueue.push({
+                    cardData: c, status: 'UNFINISHED', durationSpent: 0
+                }));
+
+                // 队尾放入 1 张结局牌
+                if (poolEnding.length) {
+                    gameQueue.push({
+                        cardData: getRandomItem(poolEnding), status: 'UNFINISHED', durationSpent: 0
+                    });
+                    hasEndingInQueue = true;
+                }
+            }
+        }
+
+        function pushRandomCards(targetArr, pool, count) {
+            if (!pool.length || count <= 0) return;
+            for (let i = 0; i < count; i++) {
+                targetArr.push(getRandomItem(pool));
+            }
+        }
+
+        function getRandomItem(arr) {
+            return arr[Math.floor(Math.random() * arr.length)];
+        }
+
+        function shuffleArray(arr) {
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i],
+                    arr[j]] = [arr[j],
+                    arr[i]];
+            }
+        }
+
+        /* ----------------------------------------------------
+         * 4. 发牌飞入动画与局内界面控制
+         * ---------------------------------------------------- */
+        function initGameSession() {
+            currentCardIndex = 0;
+            secondsElapsed = 0;
+            extraCardsDrawn = 0;
+            punishmentCount = 0;
+            completedCount = 0;
+            hasBeggedThisTurn = false;
+            activeEffects = [];
+
+            switchView('page-game');
+
+            if (gameTimer) clearInterval(gameTimer);
+            gameTimer = setInterval(() => {
+                secondsElapsed++;
+                const m = String(Math.floor(secondsElapsed / 60)).padStart(2, '0');
+                const s = String(secondsElapsed % 60).padStart(2, '0');
+                document.getElementById('gameTimerText').innerText = `${m}:${s}`;
+            }, 1000);
+
+            // 播放图1/图2发牌飞入动画，飞入结束后才展示任务卡片
+            playDealAnimation(() => {
+                loadCurrentCard();
+            });
+        }
+
+        // 图1/图2视觉要求：中间发牌向顶部序列飞入动画
+        function playDealAnimation(onComplete) {
+            const seqBar = document.getElementById('cardSeqBar');
+            seqBar.innerHTML = '';
+            const app = document.getElementById('app');
+            const appBox = app.getBoundingClientRect();
+
+            // 先临时渲染真实卡牌，用来获取准确位置
+            renderHeaderSequence();
+
+            const realItems = seqBar.querySelectorAll('.seq-item');
+            const dealCount = Math.min(8, realItems.length, gameQueue.length);
+            let finishedCount = 0;
+
+            // 隐藏真实卡牌，等动画播完再显示
+            realItems.forEach(item => item.style.opacity = '0');
+
+            for (let i = 0; i < dealCount; i++) {
+                const realItem = realItems[i];
+                if (!realItem) continue;
+
+                const realRect = realItem.getBoundingClientRect();
+                const flyNode = document.createElement('div');
+                const cardCat = gameQueue[i].cardData.category;
+
+                flyNode.className = `seq-item status-upcoming cat-${cardCat} flying-card-node`;
+                flyNode.innerText = i + 1;
+
+                // 起点：中间
+                flyNode.style.left = `${appBox.width / 2 - 16}px`;
+                flyNode.style.top = `${appBox.height / 2}px`;
+                flyNode.style.opacity = '0';
+                flyNode.style.transform = 'scale(1.5) rotate(15deg)';
+
+                app.appendChild(flyNode);
+
+                // 计算相对于 #app 的真实落点
+                const targetLeft = realRect.left - appBox.left;
+                const targetTop = realRect.top - appBox.top;
+
+                setTimeout(() => {
+                    flyNode.style.opacity = '1';
+                    flyNode.style.transform = 'scale(1) rotate(0deg)';
+                    flyNode.style.left = `${targetLeft}px`;
+                    flyNode.style.top = `${targetTop}px`;
+                }, i * 80);
+
+                setTimeout(() => {
+                    flyNode.remove();
+                    realItem.style.opacity = '1'; // 显示真实卡牌
+                    finishedCount++;
+                    if (finishedCount === dealCount) {
+                        if (onComplete) onComplete();
+                    }
+                },
+                    dealCount * 80 + 400);
+            }
+        }
+
+        function renderHeaderSequence() {
+            try {
+                const seqBar = document.getElementById('cardSeqBar');
+                seqBar.innerHTML = '';
+                const totalDisplay = currentMode === 'ENDLESS' ? '∞': gameQueue.length;
+                document.getElementById('gameProgressText').textContent = (currentCardIndex + 1) + ' / ' + totalDisplay;
+
+                // DocumentFragment 减少重排
+                const frag = document.createDocumentFragment();
+                gameQueue.forEach((itemObj, idx) => {
+                    const item = document.createElement('div');
+                    let statusClass = 'status-upcoming';
+                    if (idx < currentCardIndex) statusClass = 'status-completed';
+                    else if (idx === currentCardIndex) statusClass = 'status-active';
+
+                    const cat = (itemObj.cardData && itemObj.cardData.category) || 'ACTION';
+                    item.className = 'seq-item ' + statusClass + ' cat-' + cat;
+                    item.textContent = idx + 1;
+                    item.onclick = function() {
+                        jumpToCard(idx);
+                    };
+                    frag.appendChild(item);
+                });
+                seqBar.appendChild(frag);
+
+                // 求饶按钮逻辑
+                const begBtn = document.getElementById('begBtn');
+                const curCard = gameQueue[currentCardIndex] ? gameQueue[currentCardIndex].cardData: null;
+                const hasEndingCard = gameQueue.some(function(q, i) {
+                    return i >= currentCardIndex && q.cardData && q.cardData.category === 'ENDING';
+                });
+
+                if (hasEndingCard || (curCard && curCard.category === 'ENDING')) {
+                    begBtn.style.display = 'none';
+                } else {
+                    begBtn.style.display = 'block';
+                    begBtn.disabled = hasBeggedThisTurn;
+                }
+            } catch (e) {
+                console.error('[DARKBEAT] 序列条渲染失败', e);
+            }
+        }
+
+        function loadCurrentCard() {
+            stopCardTask();
+            if (autoStartTimer) clearInterval(autoStartTimer);
+            hasBeggedThisTurn = false;
+
+            // 无尽模式自动补牌
+            if (currentCardIndex >= gameQueue.length) {
+                if (currentMode === 'ENDLESS') {
+                    const pool = customCards.filter(c => c.enabled !== false && c.category !== 'ENDING' && c.category !== 'PUNISHMENT');
+                    gameQueue.push({
+                        cardData: getRandomItem(pool), status: 'UNFINISHED', durationSpent: 0
+                    });
+                } else {
+                    finishGame();
+                    return;
+                }
+            }
+
+            const curObj = gameQueue[currentCardIndex];
+            const card = curObj.cardData;
+            cardStartTime = Date.now();
+
+            const cardDisplay = document.getElementById('activeCardDisplay');
+            cardDisplay.classList.remove('enter-active');
+            cardDisplay.className = `card-display card-type-${card.category}`;
+
+            setTimeout(() => cardDisplay.classList.add('enter-active'), 50);
+
+            document.getElementById('cardTag').innerText = card.category;
+            document.getElementById('cardTitle').innerText = card.title;
+            document.getElementById('cardDesc').innerText = card.desc;
+
+            // 比率修饰计算 + 特效 BPM boost
+            const rhythmRatio = (systemSettings.rhythmSpeedRatio || 100) / 100;
+            const timerRatio = (systemSettings.timerDurationRatio || 100) / 100;
+            let bpmBoost = 0;
+            activeEffects.forEach(eff => {
+                if (eff.type === 'BPM_BOOST' && (!eff.cat || eff.cat === card.category || eff.cat === 'ALL')) {
+                    bpmBoost += eff.value;
+                }
+            });
+
+            const bpmBadge = document.getElementById('cardBpmBadge');
+
+            const timerBox = document.getElementById('timerBox');
+            const canvasWrap = document.getElementById('canvasWrap');
+            const beatInfoBar = document.getElementById('beatInfoBar');
+
+            if (card.mode === 'RHYTHM' && card.bpm) {
+                const effectiveBpm = Math.round((card.bpm + bpmBoost) * rhythmRatio);
+                bpmBadge.style.display = 'inline-block';
+                bpmBadge.innerText = String(effectiveBpm) + ' BPM' + (bpmBoost ? ' (+' + String(bpmBoost) + ')': '');
+
+                timerBox.style.display = 'none';
+                canvasWrap.style.display = 'block';
+                beatInfoBar.style.display = 'flex';
+            } else if (card.mode === 'TIMER') {
+                let timerBoost = 0;
+                activeEffects.forEach(eff => {
+                    if (eff.type === 'TIMER_BOOST' && (!eff.cat || eff.cat === card.category || eff.cat === 'ALL')) {
+                        timerBoost += eff.value;
+                    }
+                });
+                const effectiveDuration = Math.round(((card.duration || 30) + timerBoost) * timerRatio);
+                bpmBadge.style.display = 'none';
+                timerBox.style.display = 'flex';
+                canvasWrap.style.display = 'none';
+                beatInfoBar.style.display = 'none';
+
+                // 修改计时任务：支持正计时与倒计时，界面强化倒计时大字
+                if (card.timerType === 'UP') {
+                    document.getElementById('timerNum').innerText = '00:00.00';
+                } else {
+                    document.getElementById('timerNum').innerText = formatTimerMs(effectiveDuration * 1000);
+                }
+                document.getElementById('timerProgressBar').style.width = '0%';
+            } else {
+                bpmBadge.style.display = 'none';
+                timerBox.style.display = 'none';
+                canvasWrap.style.display = 'none';
+                beatInfoBar.style.display = 'none';
+            }
+
+            // 惩罚卡禁止放弃
+            const giveupBtn = document.getElementById('btnGiveup');
+            if (card.category === 'PUNISHMENT') {
+                giveupBtn.classList.add('disabled');
+                document.getElementById('giveupText').innerText = '不可放弃';
+            } else {
+                giveupBtn.classList.remove('disabled');
+                document.getElementById('giveupText').innerText = '长按放弃';
+            }
+
+            // 动态选项按钮生成（支持条件判断禁用 + 多级连锁提示）
+            const choiceContainer = document.getElementById('choiceContainer');
+            const standardActions = document.getElementById('standardActions');
+
+            if (card.mode === 'CHOICE' && card.options && card.options.length > 0) {
+                choiceContainer.style.display = 'flex';
+                standardActions.style.display = 'none';
+                choiceContainer.innerHTML = '';
+
+                card.options.forEach(opt => {
+                    const btn = document.createElement('button');
+                    btn.className = 'btn-choice';
+
+                    const avail = checkOptionAvailable(opt);
+                    let label = opt.text || '（无文字）';
+
+                    // 兼容新旧概率
+                    const prob = opt.probability !== undefined ? opt.probability: (opt.prob || 100);
+                    if (prob < 100) label += ` (${prob}%)`;
+
+                    // 兼容新旧连锁/动作组标记
+                    const hasActions = (opt.actions && opt.actions.length > 1) || (opt.chain && opt.chain.length);
+                    if (hasActions) label += ' ⛓';
+
+                    if (!avail.ok) {
+                        label += ` [锁定: ${avail.reason}]`;
+                        btn.disabled = true;
+                        btn.style.opacity = '0.45';
+                        btn.style.cursor = 'not-allowed';
+                        btn.style.background = '#1e293b';
+                        btn.style.borderColor = '#334155';
+                        btn.title = '条件未满足：' + avail.reason;
+                    }
+
+                    btn.innerText = label;
+                    if (avail.ok) {
+                        btn.onclick = () => executeChoiceOption(opt);
+                    }
+                    choiceContainer.appendChild(btn);
+                });
+            } else {
+                choiceContainer.style.display = 'none';
+                standardActions.style.display = 'flex';
+            }
+
+            renderHeaderSequence();
+
+            const compBtn = document.getElementById('btnComplete');
+            if (document.getElementById('chkAutoStart').checked && card.mode !== 'CHOICE') {
+                let count = 3;
+                compBtn.innerText = `自动开始 (${count}s)`;
+                autoStartTimer = setInterval(() => {
+                    count--;
+                    if (count > 0) {
+                        compBtn.innerText = `自动开始 (${count}s)`;
+                    } else {
+                        clearInterval(autoStartTimer);
+                        startCardTask();
+                        compBtn.innerText = '完成';
+                    }
+                },
+                    1000);
+            } else {
+                compBtn.innerText = '开始';
+            }
+        }
+
+        function jumpToCard(idx) {
+            currentCardIndex = idx;
+            loadCurrentCard();
+        }
+
+        function completeCurrentCard() {
+            if (autoStartTimer) clearInterval(autoStartTimer);
+
+            const curObj = gameQueue[currentCardIndex];
+
+            if (!isCardActive && curObj.cardData.mode !== 'TARGET' && curObj.cardData.mode !== 'CHOICE') {
+                startCardTask();
+                document.getElementById('btnComplete').innerText = '完成';
+            } else {
+                // 记录完成时间与状态
+                curObj.status = 'COMPLETED';
+                curObj.durationSpent = Math.round((Date.now() - cardStartTime) / 1000);
+                completedCount++;
+
+                // 衰减特效
+                decayEffects();
+
+                if (curObj.cardData.category === 'ENDING') {
+                    finishGame();
+                    return;
+                }
+
+                currentCardIndex++;
+                loadCurrentCard();
+            }
+        }
+
+        function decayEffects() {
+            activeEffects = activeEffects.filter(eff => {
+                if (eff.remainingCards !== undefined) {
+                    eff.remainingCards--;
+                    return eff.remainingCards > 0;
+                }
+                return true;
+            });
+        }
+
+
+
+        /* ----------------------------------------------------
+         * 5. BPM Canvas 经典动效 (图4从左至右) 与 Timer 毫秒显示
+         * ---------------------------------------------------- */
+        function playBeatSound() {
+            if (!document.getElementById('chkAudio').checked) return;
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(880, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.08);
+
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.08);
+        }
+
+        function formatTimerMs(ms) {
+            const s = Math.floor(ms / 1000);
+            const m = String(Math.floor(s / 60)).padStart(2, '0');
+            const sec = String(s % 60).padStart(2, '0');
+            const cs = String(Math.floor((ms % 1000) / 10)).padStart(2, '0');
+            return `${m}:${sec}.${cs}`;
+        }
+
+        function startCardTask() {
+            isCardActive = true;
+            const card = gameQueue[currentCardIndex].cardData;
+            resizeCanvas();
+
+            const rhythmRatio = (systemSettings.rhythmSpeedRatio || 100) / 100;
+            const timerRatio = (systemSettings.timerDurationRatio || 100) / 100;
+
+            // 计算 BPM boost from effects
+            let bpmBoost = 0;
+            activeEffects.forEach(eff => {
+                if (eff.type === 'BPM_BOOST' && (!eff.cat || eff.cat === card.category || eff.cat === 'ALL')) {
+                    bpmBoost += eff.value;
+                }
+            });
+
+            if (card.mode === 'RHYTHM') {
+                const effectiveBpm = Math.round(((card.bpm || 120) + bpmBoost) * rhythmRatio);
+                const totalBeats = card.beats || 50;
+                let currentBeats = 0;
+
+                document.getElementById('beatSpeedText').innerText = `每秒 ${(effectiveBpm / 60).toFixed(1)} 次`;
+                document.getElementById('beatCountText').innerText = `${currentBeats} / ${totalBeats}`;
+
+                const intervalMs = (60 / effectiveBpm) * 1000;
+                let lastBeatTime = performance.now();
+                let dots = [];
+
+                function animLoop(now) {
+                    if (!isCardActive) return;
+
+                    if (now - lastBeatTime >= intervalMs) {
+                        lastBeatTime = now;
+                        currentBeats++;
+                        document.getElementById('beatCountText').innerText = `${currentBeats} / ${totalBeats}`;
+
+                        dots.push({
+                            x: 20, speed: (canvas.width - 65) / (intervalMs / 16.6)
+                        });
+
+                        if (currentBeats >= totalBeats) {
+                            completeCurrentCard();
+                            return;
+                        }
+                    }
+
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                    // 图4要求：绘制右侧双重撞击盲圈与从左至右网格动效
+                    const targetX = canvas.width - 45;
+                    const targetY = canvas.height / 2;
+
+                    ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+                    ctx.lineWidth = 1;
+                    for (let x = 0; x < canvas.width; x += 20) {
+                        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
+                    }
+
+                    // 外圈
+                    ctx.beginPath();
+                    ctx.arc(targetX, targetY, 26, 0, Math.PI * 2);
+                    ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+                    ctx.lineWidth = 3;
+                    ctx.stroke();
+
+                    // 内圈
+                    ctx.beginPath();
+                    ctx.arc(targetX, targetY, 18, 0, Math.PI * 2);
+                    ctx.fillStyle = 'rgba(255,255,255,0.15)';
+                    ctx.fill();
+
+                    for (let i = dots.length - 1; i >= 0; i--) {
+                        let d = dots[i];
+                        d.x += d.speed;
+
+                        ctx.beginPath();
+                        ctx.arc(d.x, targetY, 14, 0, Math.PI * 2);
+                        ctx.fillStyle = '#ffffff';
+                        ctx.shadowBlur = 12;
+                        ctx.shadowColor = '#ffffff';
+                        ctx.fill();
+                        ctx.shadowBlur = 0;
+
+                        if (d.x >= targetX) {
+                            playBeatSound();
+                            ctx.beginPath();
+                            ctx.arc(targetX, targetY, 32, 0, Math.PI * 2);
+                            ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+                            ctx.fill();
+                            dots.splice(i, 1);
+                        }
+                    }
+
+                    animFrameId = requestAnimationFrame(animLoop);
+                }
+                animFrameId = requestAnimationFrame(animLoop);
+
+            } else if (card.mode === 'TIMER') {
+                // 与 loadCurrentCard 对齐：把 TIMER_BOOST 加进实际计时
+                let timerBoost = 0;
+                activeEffects.forEach(eff => {
+                    if (eff.type === 'TIMER_BOOST' && (!eff.cat || eff.cat === card.category || eff.cat === 'ALL')) {
+                        timerBoost += eff.value;
+                    }
+                });
+                const totalMs = Math.round(((card.duration || 30) + timerBoost) * timerRatio) * 1000;
+                let startTs = performance.now();
+
+                timerInterval = setInterval(() => {
+                    if (!isCardActive) {
+                        clearInterval(timerInterval); return;
+                    }
+                    const elapsedMs = performance.now() - startTs;
+
+                    if (card.timerType === 'UP') {
+                        // 正计时
+                        document.getElementById('timerNum').innerText = formatTimerMs(elapsedMs);
+                        const percent = Math.min(100, (elapsedMs / totalMs) * 100);
+                        document.getElementById('timerProgressBar').style.width = `${percent}%`;
+
+                        if (elapsedMs >= totalMs) {
+                            clearInterval(timerInterval);
+                            completeCurrentCard();
+                        }
+                    } else {
+                        // 倒计时
+                        const remainMs = Math.max(0, totalMs - elapsedMs);
+                        document.getElementById('timerNum').innerText = formatTimerMs(remainMs);
+                        const percent = Math.min(100, (elapsedMs / totalMs) * 100);
+                        document.getElementById('timerProgressBar').style.width = `${percent}%`;
+
+                        if (remainMs <= 0) {
+                            clearInterval(timerInterval);
+                            completeCurrentCard();
+                        }
+                    }
+                },
+                    30);
+            }
+        }
+
+        function stopCardTask() {
+            isCardActive = false;
+            if (animFrameId) cancelAnimationFrame(animFrameId);
+            if (timerInterval) clearInterval(timerInterval);
+            if (ctx && canvas) ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+
+        /* ----------------------------------------------------
+         * 6. 选择型高级逻辑 & 长按放弃
+         * 优化后：支持概率触发、条件、BPM修改、强制类型、多效果
+         * ---------------------------------------------------- */
+
+        /* =========================================================
+         * 动作组重构版 - 核心执行入口
+         * 支持新格式 opt.actions + 自动兼容旧格式（action + chain）
+         * ========================================================= */
+        function executeChoiceOption(opt) {
+            try {
+                // 0. 二次校验条件
+                const avail = checkOptionAvailable(opt);
+                if (!avail.ok) {
+                    showAlert('条件未满足', avail.reason || '此选项当前不可用');
+                    return;
+                }
+
+                // 1. 自动迁移旧格式 → 新动作组格式（兼容层）
+                const normalized = migrateOptionToActionGroup(opt);
+
+                // 2. 概率判定
+                const successProb = (normalized.probability !== undefined) ? normalized.probability: 100;
+                const isSuccess = Math.random() * 100 < successProb;
+
+                if (!isSuccess) {
+                    if (normalized.failMsg) showAlert('判定失败', normalized.failMsg);
+                    else showAlert('判定失败', '运气不好，选项未生效！');
+
+                    if (normalized.failActions && normalized.failActions.length) {
+                        const result = runActionGroup(normalized.failActions, {
+                            isFail: true
+                        });
+                        if (result.ended) return;
+                        if (result.finalJump !== null) {
+                            currentCardIndex = result.finalJump;
+                        } else {
+                            currentCardIndex++;
+                        }
+                        loadCurrentCard();
+                    } else {
+                        markCurrentCardCompleted();
+                        currentCardIndex++;
+                        loadCurrentCard();
+                    }
+                    return;
+                }
+
+                // 3. 成功弹窗
+                if (normalized.successMsg) {
+                    showAlert('指示提醒', normalized.successMsg);
+                }
+
+                // 4. 标记当前卡完成（只做一次）
+                markCurrentCardCompleted();
+
+                // 5. 执行成功动作组（核心）
+                const result = runActionGroup(normalized.actions || [], {
+                    isFail: false
+                });
+
+                // 6. 统一处理最终跳转
+                if (result.ended) {
+                    // 已经在 runActionGroup 里调用了 finishGame
+                    return;
+                }
+
+                if (result.finalJump !== null) {
+                    currentCardIndex = result.finalJump;
+                } else {
+                    // 默认进入下一张（如果有插入的卡，会落到第一张新卡）
+                    currentCardIndex++;
+                }
+
+                loadCurrentCard();
+            } catch (e) {
+                console.error('[DARKBEAT] 选择执行失败', e);
+                showAlert('执行失败', '选项动作执行出错：' + (e.message || '未知错误'));
+            }
+        }
+        /* =========================================================
+         * 动作组执行器（核心）
+         * actions: 有序动作数组
+         * 返回 { finalJump, ended }
+         * ========================================================= */
+        function runActionGroup(actions, context = {}) {
+            if (!Array.isArray(actions) || actions.length === 0) {
+                return {
+                    finalJump: null,
+                    ended: false
+                };
+            }
+
+            let insertOffset = 1; // 从当前卡后面开始插
+            let finalJump = null; // 最终跳转目标（最后一次覆盖）
+            let ended = false;
+
+            for (let i = 0; i < actions.length; i++) {
+                const act = actions[i];
+                if (!act || !act.type) continue;
+
+                const type = act.type.toUpperCase();
+                const param = (act.param !== undefined) ? act.param: 1;
+
+                // ---------- 纯效果类 ----------
+                if (type === 'BPM_BOOST') {
+                    activeEffects.push({
+                        type: 'BPM_BOOST',
+                        cat: act.cat || 'ALL',
+                        value: act.value || 10,
+                        remainingCards: act.duration || 2
+                    });
+                    continue;
+                }
+
+                if (type === 'TIMER_BOOST') {
+                    activeEffects.push({
+                        type: 'TIMER_BOOST',
+                        cat: act.cat || 'ALL',
+                        value: act.value || 10,
+                        remainingCards: act.duration || 2
+                    });
+                    continue;
+                }
+
+                // ---------- 结束游戏（最高优先级） ----------
+                if (type === 'END_GAME') {
+                    finishGame();
+                    ended = true;
+                    break;
+                }
+
+                // ---------- 跳转类（只记录最终目标，不立即跳） ----------
+                if (type === 'NEXT') {
+                    finalJump = (finalJump !== null ? finalJump: currentCardIndex) + param;
+                    continue;
+                }
+
+                if (type === 'JUMP') {
+                    finalJump = Math.max(0, param - 1); // 1-based → 0-based
+                    continue;
+                }
+
+                if (type === 'BACK') {
+                    finalJump = Math.max(0, (finalJump !== null ? finalJump: currentCardIndex) - param);
+                    continue;
+                }
+
+                // ---------- 插牌类 ----------
+                if (type === 'PUNISH') {
+                    const count = param;
+                    punishmentCount += count;
+                    extraCardsDrawn += count;
+
+                    const pool = customCards.filter(c => c.enabled !== false && c.category === 'PUNISHMENT');
+                    const fallback = DEFAULT_CARDS.find(c => c.category === 'PUNISHMENT') || DEFAULT_CARDS[8];
+
+                    for (let k = 0; k < count; k++) {
+                        const pCard = pool.length ? getRandomItem(pool): fallback;
+                        gameQueue.splice(currentCardIndex + insertOffset, 0, {
+                            cardData: pCard,
+                            status: 'UNFINISHED',
+                            durationSpent: 0
+                        });
+                        insertOffset++;
+                    }
+                    renderHeaderSequence(); // 实时刷新顶部序列
+                    continue;
+                }
+
+                if (type === 'DRAW' || type === 'EXTRA' || type === 'FORCE_TYPE') {
+                    // 统一处理「额外插牌 / 强制类型」
+                    const count = param;
+                    extraCardsDrawn += count;
+
+                    let pool;
+                    const forceCat = act.forceCat || null;
+
+                    if (forceCat) {
+                        // 强制指定类型
+                        pool = customCards.filter(c => c.enabled !== false && c.category === forceCat);
+                        if (!pool.length) {
+                            pool = customCards.filter(c => c.enabled !== false && c.category !== 'ENDING');
+                        }
+                    } else {
+                        // 普通额外抽（排除热身/结局/惩罚）
+                        pool = customCards.filter(c =>
+                            c.enabled !== false &&
+                            c.category !== 'WARMUP' &&
+                            c.category !== 'ENDING' &&
+                            c.category !== 'PUNISHMENT'
+                        );
+                        if (!pool.length) {
+                            pool = customCards.filter(c => c.enabled !== false && c.category !== 'ENDING');
+                        }
+                    }
+
+                    for (let k = 0; k < count; k++) {
+                        gameQueue.splice(currentCardIndex + insertOffset, 0, {
+                            cardData: getRandomItem(pool),
+                            status: 'UNFINISHED',
+                            durationSpent: 0
+                        });
+                        insertOffset++;
+                    }
+                    renderHeaderSequence();
+                    continue;
+                }
+
+                // 未知类型静默跳过
+                console.warn('[runActionGroup] 未知动作类型:', type);
+            }
+
+            return {
+                finalJump,
+                ended
+            };
+        }
+
+        /* =========================================================
+         * 旧格式 → 动作组 自动迁移（保证老卡牌不坏）
+         * ========================================================= */
+        function migrateOptionToActionGroup(oldOpt) {
+            // 已经是新格式
+            if (oldOpt.actions && Array.isArray(oldOpt.actions)) {
+                return {
+                    text: oldOpt.text,
+                    probability: oldOpt.probability !== undefined ? oldOpt.probability: (oldOpt.prob || 100),
+                    condOperator: oldOpt.condOperator || 'AND',
+                    conditions: oldOpt.conditions || [],
+                    actions: oldOpt.actions,
+                    failActions: oldOpt.failActions || [],
+                    successMsg: oldOpt.successMsg || oldOpt.popMsg || '',
+                    failMsg: oldOpt.failMsg || ''
+                };
+            }
+
+            // ---- 旧格式转换 ----
+            const actions = [];
+
+            // 1. 主动作
+            if (oldOpt.action) {
+                const t = oldOpt.action.toUpperCase();
+                if (t === 'EXTRA' || t === 'FORCE_TYPE') {
+                    actions.push({
+                        type: 'DRAW',
+                        param: oldOpt.param || 1,
+                        forceCat: oldOpt.forceCat || (t === 'FORCE_TYPE' ? 'ACTION': null)
+                    });
+                } else {
+                    actions.push({
+                        type: t,
+                        param: oldOpt.param || 1,
+                        forceCat: oldOpt.forceCat || null
+                    });
+                }
+            }
+
+            // 2. 旧 effects 字段
+            if (oldOpt.effects && Array.isArray(oldOpt.effects)) {
+                oldOpt.effects.forEach(e => {
+                    actions.push({
+                        type: e.type || 'BPM_BOOST',
+                        cat: e.cat || 'ALL',
+                        value: e.value || 10,
+                        duration: e.duration || 2
+                    });
+                });
+            }
+
+            // 3. 旧 linkage 兼容
+            if (oldOpt.linkage) {
+                actions.push({
+                    type: 'BPM_BOOST',
+                    cat: oldOpt.linkage.boostCat || 'ALL',
+                    value: oldOpt.linkage.boostVal || 20,
+                    duration: oldOpt.linkage.duration || 2
+                });
+            }
+
+            // 4. 旧 chain
+            if (oldOpt.chain && Array.isArray(oldOpt.chain)) {
+                oldOpt.chain.forEach(ch => {
+                    if (ch.action) {
+                        const t = ch.action.toUpperCase();
+                        if (t === 'EXTRA' || t === 'FORCE_TYPE') {
+                            actions.push({
+                                type: 'DRAW',
+                                param: ch.param || 1,
+                                forceCat: ch.forceCat || (t === 'FORCE_TYPE' ? 'ACTION': null)
+                            });
+                        } else {
+                            actions.push({
+                                type: t,
+                                param: ch.param || 1,
+                                forceCat: ch.forceCat || null
+                            });
+                        }
+                    }
+                    // chain 里的 effects
+                    if (ch.effects && Array.isArray(ch.effects)) {
+                        ch.effects.forEach(e => {
+                            actions.push({
+                                type: e.type || 'BPM_BOOST',
+                                cat: e.cat || 'ALL',
+                                value: e.value || 10,
+                                duration: e.duration || 2
+                            });
+                        });
+                    }
+                });
+            }
+
+            return {
+                text: oldOpt.text,
+                probability: oldOpt.prob !== undefined ? oldOpt.prob: 100,
+                condOperator: oldOpt.condOperator || 'AND',
+                conditions: oldOpt.conditions || [],
+                actions: actions,
+                failActions: [],
+                successMsg: oldOpt.popMsg || '',
+                failMsg: oldOpt.failMsg || ''
+            };
+        }
+
+        /* 辅助：标记当前卡完成 + 衰减特效 */
+        function markCurrentCardCompleted() {
+            const curObj = gameQueue[currentCardIndex];
+            if (curObj) {
+                curObj.status = 'COMPLETED';
+                curObj.durationSpent = Math.round((Date.now() - cardStartTime) / 1000);
+            }
+            completedCount++;
+            decayEffects();
+        }
+
+
+
+
+
+        /* ========== 选择型条件判断 & 多级连锁 辅助函数 ========== */
+
+        function checkOptionAvailable(opt) {
+            if (!opt.conditions || !Array.isArray(opt.conditions) || opt.conditions.length === 0) {
+                return {
+                    ok: true,
+                    reason: ''
+                };
+            }
+
+            const operator = (opt.condOperator || 'AND').toUpperCase();
+            const results = [];
+
+            for (const cond of opt.conditions) {
+                const v = cond.value !== undefined ? cond.value: 0;
+                let pass = true;
+                let reason = '';
+
+                switch (cond.type) {
+                    case 'COMPLETED_GTE':
+                        if (completedCount < v) {
+                            pass = false; reason = `需完成≥${v}张`;
+                        }
+                        break;
+                    case 'COMPLETED_LTE':
+                        if (completedCount > v) {
+                            pass = false; reason = `完成数已超${v}`;
+                        }
+                        break;
+                    case 'TIME_GTE':
+                        if (secondsElapsed < v) {
+                            pass = false; reason = `需坚持≥${v}秒`;
+                        }
+                        break;
+                    case 'TIME_LTE':
+                        if (secondsElapsed > v) {
+                            pass = false; reason = `时间已超${v}秒`;
+                        }
+                        break;
+                    case 'PUNISH_GTE':
+                        if (punishmentCount < v) {
+                            pass = false; reason = `需惩罚≥${v}次`;
+                        }
+                        break;
+                    case 'PUNISH_LTE':
+                        if (punishmentCount > v) {
+                            pass = false; reason = `惩罚已超${v}次`;
+                        }
+                        break;
+                    case 'HAS_EFFECT':
+                        if (!activeEffects.some(e => e.type === v)) {
+                            pass = false; reason = `需有${v}效果`;
+                        }
+                        break;
+                    case 'NO_EFFECT':
+                        if (activeEffects.some(e => e.type === v)) {
+                            pass = false; reason = `不可有${v}效果`;
+                        }
+                        break;
+                    default:
+                        break;
+                }
+                results.push({
+                    pass, reason
+                });
+            }
+
+            if (operator === 'OR') {
+                const any = results.find(r => r.pass);
+                if (any) return {
+                    ok: true,
+                    reason: ''
+                };
+                return {
+                    ok: false,
+                    reason: results.map(r => r.reason).filter(Boolean).join(' 或 ') || '条件不满足'
+                };
+            }
+
+            // 默认 AND
+            const fail = results.find(r => !r.pass);
+            if (fail) return {
+                ok: false,
+                reason: fail.reason
+            };
+            return {
+                ok: true,
+                reason: ''
+            };
+        }
+
+        let giveupTimer = null;
+        function setupLongPressGiveup() {
+            const btn = document.getElementById('btnGiveup');
+            const progress = document.getElementById('giveupProgress');
+
+            const startPress = () => {
+                const curObj = gameQueue[currentCardIndex];
+                if (curObj && curObj.cardData.category === 'PUNISHMENT') return;
+
+                let p = 0;
+                progress.style.width = '0%';
+                giveupTimer = setInterval(() => {
+                    p += 5;
+                    progress.style.width = `${p}%`;
+                    if (p >= 100) {
+                        clearInterval(giveupTimer);
+                        triggerGiveup();
+                    }
+                },
+                    40);
+            };
+
+            const cancelPress = () => {
+                if (giveupTimer) clearInterval(giveupTimer);
+                progress.style.width = '0%';
+            };
+
+            btn.addEventListener('mousedown', startPress);
+            btn.addEventListener('mouseup', cancelPress);
+            btn.addEventListener('mouseleave', cancelPress);
+            btn.addEventListener('touchstart', startPress);
+            btn.addEventListener('touchend', cancelPress);
+        }
+
+        function triggerGiveup() {
+            punishmentCount++;
+            extraCardsDrawn++;
+
+            const curObj = gameQueue[currentCardIndex];
+            curObj.status = 'SKIPPED';
+            curObj.durationSpent = Math.round((Date.now() - cardStartTime) / 1000);
+
+            const punishments = customCards.filter(c => c.enabled !== false && c.category === 'PUNISHMENT');
+            const punCard = punishments.length ? getRandomItem(punishments): DEFAULT_CARDS[8];
+
+            gameQueue.splice(currentCardIndex + 1, 0, {
+                cardData: punCard, status: 'UNFINISHED', durationSpent: 0
+            });
+            currentCardIndex++;
+            loadCurrentCard();
+        }
+
+        /* ----------------------------------------------------
+         * 7. "求求你让我射" 求饶交互与概率算法
+         * ---------------------------------------------------- */
+        function triggerBeg() {
+            if (hasBeggedThisTurn) return;
+
+            const begBtn = document.getElementById('begBtn');
+            begBtn.disabled = true;
+
+            document.getElementById('thinkingModal').classList.add('active');
+
+            setTimeout(() => {
+                document.getElementById('thinkingModal').classList.remove('active');
+
+                // 计算当前动态概率
+                const minutesPlayed = Math.floor(secondsElapsed / 60);
+                const prob = systemSettings.begInit + (minutesPlayed * systemSettings.begMinInc) + (completedCount * systemSettings.begTaskInc);
+                const roll = Math.random() * 100;
+
+                if (roll < prob) {
+                    // 情况 1：同意求饶 -> 绿字判定 + 导入结局卡
+                    document.getElementById('approvalModal').classList.add('active');
+                } else {
+                    // 拒绝分支：判断是纯拒绝还是延迟追加牌
+                    if (Math.random() < 0.5) {
+                        // 情况 2：拒绝求饶 -> 强制插惩罚卡 + 锁定本回合
+                        document.getElementById('refusalModal').classList.add('active');
+                    } else {
+                        // 情况 3：特殊延迟追加 X 张牌
+                        const delayCount = systemSettings.begDelayCount || 3;
+                        const endRoll = Math.random() * 100;
+                        const hasEndingAtLast = endRoll < (systemSettings.begDelayEndProb + prob / 2);
+
+                        let descText = `系统评估：还不够硬！额外为你追加 <b>${delayCount}</b> 张任务卡`;
+                        if (hasEndingAtLast) descText += `，且最后一张必为【结局牌】！加油坚持！`;
+                        else descText += `！加油坚持！`;
+
+                        document.getElementById('delayBegDesc').innerHTML = descText;
+                        document.getElementById('delayBegModal').dataset.hasEnding = hasEndingAtLast ? 'true': 'false';
+                        document.getElementById('delayBegModal').classList.add('active');
+                    }
+                }
+            },
+                2000);
+        }
+
+        function closeRefusalModal() {
+            document.getElementById('refusalModal').classList.remove('active');
+            hasBeggedThisTurn = true;
+
+            // 记录额外抽卡并插入【惩罚卡】，且绝不跳过当前任务！
+            punishmentCount++;
+            extraCardsDrawn++;
+            const punishments = customCards.filter(c => c.enabled !== false && c.category === 'PUNISHMENT');
+            const punCard = punishments.length ? getRandomItem(punishments): DEFAULT_CARDS[8];
+
+            gameQueue.splice(currentCardIndex + 1,
+                0,
+                {
+                    cardData: punCard,
+                    status: 'UNFINISHED',
+                    durationSpent: 0
+                });
+            renderHeaderSequence();
+        }
+
+        function closeDelayBegModal() {
+            const modal = document.getElementById('delayBegModal');
+            const hasEndingAtLast = modal.dataset.hasEnding === 'true';
+            modal.classList.remove('active');
+            hasBeggedThisTurn = true;
+
+            const count = systemSettings.begDelayCount || 3;
+            extraCardsDrawn += count;
+
+            const pool = customCards.filter(c => c.enabled !== false && c.category !== 'WARMUP' && c.category !== 'ENDING' && c.category !== 'PUNISHMENT');
+            const endings = customCards.filter(c => c.enabled !== false && c.category === 'ENDING');
+
+            const addNum = hasEndingAtLast ? count - 1: count;
+            for (let i = 0; i < addNum; i++) {
+                gameQueue.splice(currentCardIndex + 1 + i, 0, {
+                    cardData: getRandomItem(pool), status: 'UNFINISHED', durationSpent: 0
+                });
+            }
+
+            if (hasEndingAtLast) {
+                const endCard = endings.length ? getRandomItem(endings): DEFAULT_CARDS[9];
+                gameQueue.splice(currentCardIndex + count, 0, {
+                    cardData: endCard, status: 'UNFINISHED', durationSpent: 0
+                });
+                hasEndingInQueue = true;
+            }
+
+            renderHeaderSequence();
+        }
+
+        function closeApprovalModal() {
+            document.getElementById('approvalModal').classList.remove('active');
+            const endings = customCards.filter(c => c.enabled !== false && c.category === 'ENDING');
+            const endCard = endings.length ? getRandomItem(endings): DEFAULT_CARDS[9];
+
+            // 直接在下一张导入【结局卡】
+            gameQueue.splice(currentCardIndex + 1, 0, {
+                cardData: endCard, status: 'UNFINISHED', durationSpent: 0
+            });
+            hasEndingInQueue = true;
+
+            currentCardIndex++;
+            loadCurrentCard();
+        }
+
+        /* ----------------------------------------------------
+         * 8. 精确数据统计与历史战报
+         * ---------------------------------------------------- */
+        function finishGame() {
+            stopCardTask();
+            if (gameTimer) clearInterval(gameTimer);
+
+            const totalDrawn = gameQueue.length;
+            const uncompletedCount = Math.max(0, totalDrawn - completedCount);
+
+            const m = String(Math.floor(secondsElapsed / 60)).padStart(2, '0');
+            const s = String(secondsElapsed % 60).padStart(2, '0');
+            const timeStr = `${m}:${s}`;
+
+            document.getElementById('sumTime').innerText = timeStr;
+            document.getElementById('sumTotalDrawn').innerText = totalDrawn;
+            document.getElementById('sumCompleted').innerText = completedCount;
+            document.getElementById('sumUncompleted').innerText = uncompletedCount;
+            document.getElementById('sumExtra').innerText = extraCardsDrawn;
+            document.getElementById('sumPunish').innerText = punishmentCount;
+
+            // 写入历史战报
+            const logItem = {
+                id: 'log_' + Date.now(),
+                dateStr: new Date().toLocaleString('zh-CN', {
+                    month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit'
+                }),
+                mode: currentMode,
+                timeStr,
+                totalDrawn,
+                completedCount,
+                uncompletedCount,
+                punishmentCount,
+                queueSnapshot: JSON.parse(JSON.stringify(gameQueue))
+            };
+
+            historyLogs.unshift(logItem);
+            saveHistoryToStorage();
+            renderHistoryLogs();
+
+            switchView('page-summary');
+        }
+
+        function renderHistoryLogs() {
+            const container = document.getElementById('historyListContainer');
+            container.innerHTML = ''; // 清空仍安全
+
+            if (!historyLogs.length) {
+                const empty = document.createElement('div');
+                empty.style.cssText = 'text-align:center; color:#64748b; font-size:13px; margin-top:30px;';
+                empty.textContent = '暂无历史战报记录';
+                container.appendChild(empty);
+                return;
+            }
+
+            const frag = document.createDocumentFragment();
+            historyLogs.forEach(log => {
+                const card = document.createElement('div');
+                card.className = 'history-card';
+
+                // header
+                const header = document.createElement('div');
+                header.className = 'history-card-header';
+                const left = document.createElement('span');
+                left.textContent = `${log.mode || ''} 模式 | ${log.dateStr || ''}`;
+                const right = document.createElement('span');
+                right.textContent = log.timeStr || '';
+                header.appendChild(left);
+                header.appendChild(right);
+
+                // body
+                const body = document.createElement('div');
+                body.className = 'history-card-body';
+                ['抽卡: ' + (log.totalDrawn || 0) + ' 张',
+                    '完成: ' + (log.completedCount || 0) + ' 张',
+                    '未完成: ' + (log.uncompletedCount || 0) + ' 张',
+                    '惩罚: ' + (log.punishmentCount || 0) + ' 次'].forEach(txt => {
+                        const s = document.createElement('span');
+                        s.textContent = txt;
+                        body.appendChild(s);
+                    });
+
+                // footer
+                const footer = document.createElement('div');
+                footer.className = 'history-card-footer';
+                const idSpan = document.createElement('span');
+                idSpan.textContent = '战报ID: ' + (log.id ? String(log.id).substr(4): '');
+                const btn = document.createElement('button');
+                btn.className = 'btn-xs';
+                btn.textContent = '查看明细';
+                btn.onclick = () => viewHistoryDetail(log.id);
+                footer.appendChild(idSpan);
+                footer.appendChild(btn);
+
+                card.appendChild(header);
+                card.appendChild(body);
+                card.appendChild(footer);
+                frag.appendChild(card);
+            });
+            container.appendChild(frag);
+        }
+
+        function clearHistoryLogs() {
+            if (confirm('确定要清空过往战报历史吗？')) {
+                historyLogs = [];
+                try {
+                    localStorage.removeItem(CONFIG.STORAGE.HISTORY);
+                    localStorage.removeItem(CONFIG.STORAGE.HISTORY_V5); // 同时清理旧 key
+                } catch (e) {
+                    console.warn('[DARKBEAT] 清理历史 key 失败', e);
+                }
+                renderHistoryLogs();
+            }
+        }
+
+        function viewHistoryDetail(logId) {
+            const log = historyLogs.find(l => l.id === logId);
+            if (!log) return;
+            openGameReviewView(log.queueSnapshot, `历史战报明细 (${log.dateStr})`, true);
+        }
+
+        function openGameReviewView(snapshotArr = null, title = '本局抽取卡牌回顾', isHistory = false) {
+            try {
+                const targetQueue = snapshotArr || gameQueue;
+                const container = document.getElementById('reviewListContainer');
+                document.getElementById('reviewViewTitle').textContent = title; // 安全
+                container.innerHTML = '';
+
+                const frag = document.createDocumentFragment();
+                targetQueue.forEach((item, idx) => {
+                    const row = document.createElement('div');
+                    row.className = 'review-item';
+                    row.style.borderLeftColor = getCategoryColor(item.cardData.category);
+
+                    const left = document.createElement('div');
+                    const titleDiv = document.createElement('div');
+                    titleDiv.style.cssText = 'font-size:14px; color:#fff; font-weight:bold;';
+                    titleDiv.textContent = `${idx + 1}. ${item.cardData.title || '(无标题)'}`;
+                    const meta = document.createElement('div');
+                    meta.style.cssText = 'font-size:11px; color:#718096;';
+                    meta.textContent = `${item.cardData.category || ''} | 耗时: ${item.durationSpent || 0}s`;
+                    left.appendChild(titleDiv);
+                    left.appendChild(meta);
+
+                    const statusSpan = document.createElement('span');
+                    if (item.status === 'COMPLETED') {
+                        statusSpan.className = 'review-status-done';
+                        statusSpan.textContent = '已完成';
+                    } else if (item.status === 'SKIPPED') {
+                        statusSpan.className = 'review-status-skip';
+                        statusSpan.textContent = '已放弃';
+                    } else if (item.cardData.category === 'PUNISHMENT') {
+                        statusSpan.className = 'review-status-punish';
+                        statusSpan.textContent = '惩罚项';
+                    } else {
+                        statusSpan.className = 'review-status-unfinish';
+                        statusSpan.textContent = '未完成';
+                    }
+
+                    row.appendChild(left);
+                    row.appendChild(statusSpan);
+                    frag.appendChild(row);
+                });
+                container.appendChild(frag);
+
+                const btnBack = document.getElementById('reviewBtnBackSummary');
+                btnBack.style.display = isHistory ? 'none': 'block';
+
+                switchView('page-review');
+            } catch (e) {
+                console.error('[DARKBEAT] 回顾视图渲染失败',
+                    e);
+                showAlert('渲染失败',
+                    '无法显示回顾列表：' + (e.message || '未知错误'));
+            }
+        }
+
+        /* ----------------------------------------------------
+         * 9. 任务管理与完整复刻外观弹窗预览
+         * ---------------------------------------------------- */
+        let currentFilterCategory = 'ALL';
+
+        function renderTaskManager() {
+            const container = document.getElementById('taskListContainer');
+            container.innerHTML = '';
+
+            const filtered = currentFilterCategory === 'ALL'
+            ? customCards: customCards.filter(function(c) {
+                return c.category === currentFilterCategory;
+            });
+
+            if (!filtered.length) {
+                const empty = document.createElement('div');
+                empty.style.cssText = 'text-align:center;color:#64748b;font-size:13px;margin-top:30px;';
+                empty.textContent = '当前分类暂无卡牌';
+                container.appendChild(empty);
+                return;
+            }
+
+            const frag = document.createDocumentFragment();
+            filtered.forEach(function(task) {
+                const item = document.createElement('div');
+                item.className = 'task-card-item';
+                item.style.borderLeftColor = getCategoryColor(task.category);
+                item.onclick = function(e) {
+                    if (!e.target.closest('.task-card-ops')) {
+                        previewTaskCard(task);
+                    }
+                };
+
+                // info
+                const info = document.createElement('div');
+                info.className = 'task-card-info';
+                const h4 = document.createElement('h4');
+                h4.textContent = task.title || '(无标题)';
+                const p = document.createElement('p');
+                let meta = (task.category || '') + ' | ' + (task.mode || '');
+                if (task.bpm) meta += ' | ' + task.bpm + 'BPM';
+                p.textContent = meta;
+                info.appendChild(h4);
+                info.appendChild(p);
+
+                // ops
+                const ops = document.createElement('div');
+                ops.className = 'task-card-ops';
+
+                const label = document.createElement('label');
+                label.className = 'switch';
+                const input = document.createElement('input');
+                input.type = 'checkbox';
+                input.checked = task.enabled !== false;
+                input.onchange = function() {
+                    toggleTaskSwitch(task.id, input.checked);
+                };
+                const slider = document.createElement('span');
+                slider.className = 'slider-round';
+                label.appendChild(input);
+                label.appendChild(slider);
+
+                const editBtn = document.createElement('button');
+                editBtn.className = 'btn-icon';
+                editBtn.textContent = '✏️';
+                editBtn.onclick = function(e) {
+                    e.stopPropagation(); editCustomTask(task.id);
+                };
+
+                const delBtn = document.createElement('button');
+                delBtn.className = 'btn-icon';
+                delBtn.textContent = '🗑️';
+                delBtn.onclick = function(e) {
+                    e.stopPropagation(); deleteCustomTask(task.id);
+                };
+
+                ops.appendChild(label);
+                ops.appendChild(editBtn);
+                ops.appendChild(delBtn);
+
+                item.appendChild(info);
+                item.appendChild(ops);
+                frag.appendChild(item);
+            });
+            container.appendChild(frag);
+        }
+
+function previewTaskCard(card) {
+  try {
+    const previewContainer = document.getElementById('previewCardContainer');
+    const cat = card.category || 'ACTION';
+
+    // 重置 class + 强制可见（解决全黑）
+    previewContainer.className = 'card-display';
+    previewContainer.classList.add('card-type-' + cat);
+    previewContainer.style.opacity = '1';
+    previewContainer.style.transform = 'translateY(0)';
+    void previewContainer.offsetHeight; // reflow
+    previewContainer.classList.add('enter-active');
+
+    // 使用公共渲染
+    renderCardFace(previewContainer, card, { isPreview: true });
+
+    document.getElementById('previewModal').classList.add('active');
+  } catch (e) {
+    console.error('[DARKBEAT] 预览卡牌失败', e);
+    showAlert('预览失败', '无法显示卡牌预览：' + (e.message || '未知错误'));
+  }
+}
+
+/* ========== 公共 UI 工具：安全渲染卡牌正面 ========== */
+function renderCardFace(container, card, options) {
+  // options = { showTimerPreview: false, isPreview: false }
+  options = options || {};
+  const cat = card.category || 'ACTION';
+
+  // 清空
+  container.innerHTML = '';
+
+  // top
+  const top = document.createElement('div');
+  top.className = 'card-top-info';
+  const tag = document.createElement('span');
+  tag.className = 'card-tag';
+  tag.textContent = cat;
+  top.appendChild(tag);
+
+  if (card.bpm) {
+    const bpm = document.createElement('span');
+    bpm.className = 'card-bpm-badge';
+    bpm.textContent = card.bpm + ' BPM';
+    top.appendChild(bpm);
+  }
+  container.appendChild(top);
+
+  // title
+  const titleEl = document.createElement('div');
+  titleEl.className = 'card-title';
+  titleEl.textContent = card.title || '(无标题)';
+  container.appendChild(titleEl);
+
+  // desc
+  const descEl = document.createElement('div');
+  descEl.className = 'card-desc';
+  descEl.textContent = card.desc || '';
+  container.appendChild(descEl);
+
+  // 预览模式额外内容
+  if (options.isPreview) {
+    if (card.mode === 'TIMER') {
+      const box = document.createElement('div');
+      box.className = 'timer-display-box';
+      box.style.marginTop = '20px';
+      const num = document.createElement('div');
+      num.className = 'timer-big-num';
+      const dur = String(card.duration || 30).padStart(2, '0');
+      num.textContent = '00:' + dur + '.00';
+      const bar = document.createElement('div');
+      bar.className = 'timer-progress-bar';
+      bar.style.width = '100%';
+      box.appendChild(num);
+      box.appendChild(bar);
+      container.appendChild(box);
+    } else if (card.mode === 'CHOICE' && Array.isArray(card.options)) {
+      const group = document.createElement('div');
+      group.className = 'choice-button-group';
+      group.style.marginTop = '20px';
+      card.options.forEach(function(o) {
+        const btn = document.createElement('div');
+        btn.className = 'btn-choice';
+        btn.style.opacity = '0.85';
+        let label = o.text || '';
+        const prob = (o.probability !== undefined) ? o.probability : (o.prob || 100);
+        if (prob < 100) label += ' (' + prob + '%)';
+        if (o.conditions && o.conditions.length) label += ' 🔒';
+        if ((o.actions && o.actions.length > 1) || (o.chain && o.chain.length)) label += ' ⛓';
+        btn.textContent = label;
+        group.appendChild(btn);
+      });
+      container.appendChild(group);
+    }
+  }
+}
+
+        function getCategoryColor(cat) {
+            const colors = {
+                WARMUP: '#1d4ed8', ACTION: '#2563eb', CHALLENGE: '#7c3aed', OPPORTUNITY: '#059669', EVENT: '#d97706', PUNISHMENT: '#dc2626', ENDING: '#db2777'
+            };
+            return colors[cat] || '#94a3b8';
+        }
+
+        function filterTaskCategory(cat, el) {
+            currentFilterCategory = cat;
+            document.querySelectorAll('.type-filter-chip').forEach(c => c.classList.remove('active'));
+            el.classList.add('active');
+            renderTaskManager();
+        }
+
+        function toggleTaskSwitch(id, enabled) {
+            const task = customCards.find(c => c.id === id);
+            if (task) {
+                task.enabled = enabled;
+                saveCardsToStorage();
+            }
+        }
+
+        function openTaskModal() {
+            document.getElementById('mTaskId').value = '';
+            document.getElementById('mTaskName').value = '';
+            document.getElementById('mTaskDesc').value = '';
+            document.getElementById('mTaskCategory').value = 'ACTION';
+            document.getElementById('mTaskMode').value = 'RHYTHM';
+            document.getElementById('mTaskBpm').value = 120;
+            document.getElementById('mTaskBeats').value = 60;
+            document.getElementById('mTaskTimerType').value = 'DOWN';
+            document.getElementById('mTaskSec').value = 30;
+            document.getElementById('modalTaskTitle').innerText = '新建卡牌';
+
+            // 清空并添加默认选项
+            document.getElementById('choiceOptionsContainer').innerHTML = '';
+            addChoiceOptionRow('是', 100, 'AND', [], [{
+                type: 'NEXT', param: 1
+            }]);
+            addChoiceOptionRow('否', 100, 'AND', [], [{
+                type: 'PUNISH', param: 1
+            }]);
+
+            toggleTaskModeFields();
+            document.getElementById('taskModal').classList.add('active');
+        }
+
+        function closeTaskModal() {
+            document.getElementById('taskModal').classList.remove('active');
+        }
+
+        function toggleTaskModeFields() {
+            const m = document.getElementById('mTaskMode').value;
+            document.getElementById('rhythmFields').style.display = m === 'RHYTHM' ? 'block': 'none';
+            document.getElementById('timerFields').style.display = m === 'TIMER' ? 'block': 'none';
+            document.getElementById('choiceFields').style.display = m === 'CHOICE' ? 'block': 'none';
+        }
+
+        /* =========================================================
+         * 动作组编辑 UI - 新建/编辑一个选项
+         * ========================================================= */
+        function addChoiceOptionRow(
+            text = '',
+            probability = 100,
+            condOperator = 'AND',
+            conditions = [],
+            actions = [],
+            failActions = [],
+            successMsg = '',
+            failMsg = ''
+        ) {
+            const container = document.getElementById('choiceOptionsContainer');
+            const row = document.createElement('div');
+            row.className = 'opt-row';
+
+            row.innerHTML = `
+            <!-- 基础 -->
+            <div style="display:flex; gap:6px; align-items:center;">
+            <input type="text" class="form-control opt-text" style="flex:1;" placeholder="选项文字（必填）" value="${escapeHtml(text)}">
+            <button class="btn-mini danger" onclick="this.closest('.opt-row').remove()">✕ 删除</button>
+            </div>
+
+            <div style="display:flex; gap:8px; align-items:center; font-size:12px; color:#94a3b8;">
+            <span>触发概率</span>
+            <input type="number" class="form-control opt-prob" style="width:70px;" value="${probability}" min="0" max="100" title="0-100">
+            <span>%</span>
+            </div>
+
+            <!-- 成功/失败提示 -->
+            <div class="opt-section">
+            <div class="opt-section-title msg">成功 / 失败弹窗提示</div>
+            <div style="display:flex; flex-direction:column; gap:6px;">
+            <input type="text" class="form-control opt-successMsg" placeholder="成功时弹窗（可留空）" value="${escapeHtml(successMsg)}">
+            <input type="text" class="form-control opt-failMsg" placeholder="概率失败时弹窗（可留空）" value="${escapeHtml(failMsg)}">
+            </div>
+            </div>
+
+            <!-- 条件 -->
+            <div class="opt-section">
+            <div class="opt-section-title cond">
+            <span>触发条件</span>
+            <button class="btn-mini" onclick="addConditionToOpt(this.closest('.opt-row'))">+ 条件</button>
+            </div>
+            <div style="display:flex; gap:8px; align-items:center; margin-bottom:6px; font-size:11px; color:#a78bfa;">
+            <span>逻辑：</span>
+            <select class="form-control opt-condOperator" style="width:110px;">
+            <option value="AND" ${condOperator === 'AND'?'selected': ''}>全部满足 (AND)</option>
+            <option value="OR"  ${condOperator === 'OR' ?'selected': ''}>任一满足 (OR)</option>
+            </select>
+            <span style="color:#64748b;">无条件 = 始终可用</span>
+            </div>
+            <div class="cond-list"></div>
+            </div>
+
+            <!-- 成功动作组（核心） -->
+            <div class="opt-section">
+            <div class="opt-section-title action">
+            <span>成功动作组（按顺序执行）</span>
+            <button class="btn-mini" onclick="addActionToOpt(this.closest('.opt-row'), false)">+ 动作</button>
+            </div>
+            <div style="font-size:10px; color:#64748b; margin-bottom:4px;">
+            可添加：跳转 / 抽惩罚 / 额外插牌 / BPM加成 / 结束游戏 等
+            </div>
+            <div class="action-list success-actions"></div>
+            </div>
+
+            <!-- 失败动作组 -->
+            <div class="opt-section">
+            <div class="opt-section-title fail-action">
+            <span>失败动作组（概率失败时执行，可空）</span>
+            <button class="btn-mini" onclick="addActionToOpt(this.closest('.opt-row'), true)">+ 失败动作</button>
+            </div>
+            <div class="action-list fail-actions"></div>
+            </div>
+            `;
+
+            container.appendChild(row);
+
+            // 回填条件
+            if (conditions && conditions.length) {
+                conditions.forEach(c => addConditionToOpt(row, c.type || '', c.value || 0));
+            }
+
+            // 回填成功动作组
+            if (actions && actions.length) {
+                actions.forEach(a => addActionToOpt(row, false, a));
+            } else {
+                // 默认给一个 NEXT
+                addActionToOpt(row, false, {
+                    type: 'NEXT', param: 1
+                });
+            }
+
+            // 回填失败动作组
+            if (failActions && failActions.length) {
+                failActions.forEach(a => addActionToOpt(row, true, a));
+            }
+        }
+
+        /* 添加一个动作到成功/失败动作组 */
+        function addActionToOpt(optRow, isFail = false, data = {}) {
+            const list = optRow.querySelector(isFail ? '.fail-actions': '.success-actions');
+            const div = document.createElement('div');
+            div.className = 'action-row' + (isFail ? ' fail': '');
+
+            const type = (data.type || 'NEXT').toUpperCase();
+            // BPM_BOOST 的 param 字段实际存的是 duration，回填时要优先用 duration
+            const param = (type === 'BPM_BOOST' || type === 'TIMER_BOOST')
+            ? (data.duration !== undefined ? data.duration: (data.param !== undefined ? data.param: 2)): (data.param !== undefined ? data.param: 1);
+            const forceCat = data.forceCat || '';
+            const value = data.value !== undefined ? data.value: 20;
+            const cat = data.cat || 'ALL';
+
+            div.innerHTML = `
+            <select class="form-control act-type" style="flex:1.3; min-width:120px;" onchange="onActionTypeChange(this)">
+            <option value="NEXT" ${type === 'NEXT'?'selected': ''}>跳转下 X 个</option>
+            <option value="JUMP" ${type === 'JUMP'?'selected': ''}>跳转指定序号</option>
+            <option value="BACK" ${type === 'BACK'?'selected': ''}>返回上 X 步</option>
+            <option value="PUNISH" ${type === 'PUNISH'?'selected': ''}>抽 X 张惩罚</option>
+            <option value="DRAW" ${type === 'DRAW'?'selected': ''}>额外插牌 (可强制类型)</option>
+            <option value="BPM_BOOST" ${type === 'BPM_BOOST'?'selected': ''}>BPM 临时加成</option>
+            <option value="TIMER_BOOST" ${type === 'TIMER_BOOST'?'selected': ''}>计时时长加成</option>
+            <option value="END_GAME" ${type === 'END_GAME'?'selected': ''}>直接结束游戏</option>
+            </select>
+
+            <input type="number" class="form-control act-param" style="width:58px;" value="${param}" title="参数 X / 持续张数" placeholder="参数">
+
+            <select class="form-control act-forceCat" style="flex:1; min-width:90px; ${type === 'DRAW'?'': 'display:none;'}" title="强制类型（仅额外插牌）">
+            <option value="">(不强制)</option>
+            <option value="ACTION" ${forceCat === 'ACTION'?'selected': ''}>动作</option>
+            <option value="CHALLENGE" ${forceCat === 'CHALLENGE'?'selected': ''}>挑战</option>
+            <option value="OPPORTUNITY" ${forceCat === 'OPPORTUNITY'?'selected': ''}>机会</option>
+            <option value="EVENT" ${forceCat === 'EVENT'?'selected': ''}>事件</option>
+            <option value="PUNISHMENT" ${forceCat === 'PUNISHMENT'?'selected': ''}>惩罚</option>
+            <option value="WARMUP" ${forceCat === 'WARMUP'?'selected': ''}>热身</option>
+            </select>
+
+            <input type="number" class="form-control act-value" style="width:52px; ${type === 'BPM_BOOST' || type === 'TIMER_BOOST'?'': 'display:none;'}" value="${value}" title="加成值" placeholder="加成">
+
+            <select class="form-control act-cat" style="flex:0.9; min-width:70px; ${type === 'BPM_BOOST' || type === 'TIMER_BOOST'?'': 'display:none;'}">
+            <option value="ALL" ${cat === 'ALL'?'selected': ''}>全部</option>
+            <option value="ACTION" ${cat === 'ACTION'?'selected': ''}>动作</option>
+            <option value="CHALLENGE" ${cat === 'CHALLENGE'?'selected': ''}>挑战</option>
+            <option value="PUNISHMENT" ${cat === 'PUNISHMENT'?'selected': ''}>惩罚</option>
+            </select>
+
+            <button class="btn-sort" onclick="moveAction(this, -1)" title="上移">↑</button>
+            <button class="btn-sort" onclick="moveAction(this, 1)" title="下移">↓</button>
+            <button class="btn-mini danger" onclick="this.closest('.action-row').remove()">✕</button>
+            `;
+
+            list.appendChild(div);
+            onActionTypeChange(div.querySelector('.act-type'));
+        }
+
+        /* 动作类型切换时显示/隐藏相关字段 */
+        function onActionTypeChange(selectEl) {
+            const row = selectEl.closest('.action-row');
+            const type = selectEl.value;
+
+            const forceCat = row.querySelector('.act-forceCat');
+            const valueInput = row.querySelector('.act-value');
+            const catSelect = row.querySelector('.act-cat');
+            const paramInput = row.querySelector('.act-param');
+
+            forceCat.style.display = 'none';
+            valueInput.style.display = 'none';
+            catSelect.style.display = 'none';
+            paramInput.style.display = 'inline-block';
+
+            if (type === 'DRAW') {
+                forceCat.style.display = 'inline-block';
+                paramInput.placeholder = '张数';
+                paramInput.title = '插牌张数';
+            } else if (type === 'BPM_BOOST' || type === 'TIMER_BOOST') {
+                valueInput.style.display = 'inline-block';
+                catSelect.style.display = 'inline-block';
+                paramInput.placeholder = '持续张';
+                paramInput.title = '持续几张牌';
+            } else if (type === 'END_GAME') {
+                paramInput.style.display = 'none';
+            } else {
+                paramInput.placeholder = '参数X';
+                paramInput.title = '参数';
+            }
+        }
+
+        /* 动作上移/下移 */
+        function moveAction(btn, direction) {
+            const row = btn.closest('.action-row');
+            const list = row.parentElement;
+            if (direction < 0 && row.previousElementSibling) {
+                list.insertBefore(row, row.previousElementSibling);
+            } else if (direction > 0 && row.nextElementSibling) {
+                list.insertBefore(row.nextElementSibling, row);
+            }
+        }
+
+        /* 添加条件（保持之前的实现，稍作兼容） */
+        function addConditionToOpt(optRow, type = '', value = 0) {
+            const list = optRow.querySelector('.cond-list');
+            const div = document.createElement('div');
+            div.className = 'cond-row';
+            div.innerHTML = `
+            <select class="form-control cond-type" style="flex:1.3;">
+            <option value="">(选择条件)</option>
+            <option value="COMPLETED_GTE" ${type === 'COMPLETED_GTE'?'selected': ''}>已完成 ≥</option>
+            <option value="COMPLETED_LTE" ${type === 'COMPLETED_LTE'?'selected': ''}>已完成 ≤</option>
+            <option value="TIME_GTE" ${type === 'TIME_GTE'?'selected': ''}>时间(秒) ≥</option>
+            <option value="TIME_LTE" ${type === 'TIME_LTE'?'selected': ''}>时间(秒) ≤</option>
+            <option value="PUNISH_GTE" ${type === 'PUNISH_GTE'?'selected': ''}>惩罚次数 ≥</option>
+            <option value="PUNISH_LTE" ${type === 'PUNISH_LTE'?'selected': ''}>惩罚次数 ≤</option>
+            <option value="HAS_EFFECT" ${type === 'HAS_EFFECT'?'selected': ''}>拥有效果</option>
+            <option value="NO_EFFECT" ${type === 'NO_EFFECT'?'selected': ''}>没有效果</option>
+            </select>
+            <input type="number" class="form-control cond-val" style="width:70px;" placeholder="数值" value="${value}">
+            <button class="btn-mini danger" onclick="this.parentElement.remove()">✕</button>
+            `;
+            list.appendChild(div);
+        }
+
+        /* 简单转义 */
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;');
+        }
+
+
+        function editCustomTask(id) {
+            const task = customCards.find(c => c.id === id);
+            if (!task) return;
+
+            document.getElementById('mTaskId').value = task.id;
+            document.getElementById('mTaskCategory').value = task.category;
+            document.getElementById('mTaskMode').value = task.mode;
+            document.getElementById('mTaskName').value = task.title;
+            document.getElementById('mTaskDesc').value = task.desc;
+            document.getElementById('mTaskBpm').value = task.bpm || 120;
+            document.getElementById('mTaskBeats').value = task.beats || 60;
+            document.getElementById('mTaskTimerType').value = task.timerType || 'DOWN';
+            document.getElementById('mTaskSec').value = task.duration || 30;
+
+            const optContainer = document.getElementById('choiceOptionsContainer');
+            optContainer.innerHTML = '';
+
+            if (task.options && task.options.length) {
+                task.options.forEach(o => {
+                    // 运行时兼容：如果是旧格式，先转成新格式再回填
+                    const normalized = (typeof migrateOptionToActionGroup === 'function')
+                    ? migrateOptionToActionGroup(o): o;
+
+                    addChoiceOptionRow(
+                        normalized.text || '',
+                        normalized.probability !== undefined ? normalized.probability: 100,
+                        normalized.condOperator || 'AND',
+                        normalized.conditions || [],
+                        normalized.actions || [],
+                        normalized.failActions || [],
+                        normalized.successMsg || '',
+                        normalized.failMsg || ''
+                    );
+                });
+            } else {
+                // 默认两个简单选项
+                addChoiceOptionRow('是', 100, 'AND', [], [{
+                    type: 'NEXT', param: 1
+                }]);
+                addChoiceOptionRow('否', 100, 'AND', [], [{
+                    type: 'PUNISH', param: 1
+                }]);
+            }
+
+            toggleTaskModeFields();
+            document.getElementById('modalTaskTitle').innerText = '编辑卡牌';
+            document.getElementById('taskModal').classList.add('active');
+        }
+
+        function saveCustomTask() {
+            const id = document.getElementById('mTaskId').value;
+            const category = document.getElementById('mTaskCategory').value;
+            const mode = document.getElementById('mTaskMode').value;
+            const title = document.getElementById('mTaskName').value.trim();
+            const desc = document.getElementById('mTaskDesc').value.trim();
+
+            if (!title) {
+                alert('请输入卡牌标题'); return;
+            }
+
+            const options = [];
+            if (mode === 'CHOICE') {
+                document.querySelectorAll('#choiceOptionsContainer .opt-row').forEach(row => {
+                    const text = row.querySelector('.opt-text').value.trim();
+                    if (!text) return;
+
+                    const probability = parseFloat(row.querySelector('.opt-prob').value) || 100;
+                    const successMsg = row.querySelector('.opt-successMsg').value.trim();
+                    const failMsg = row.querySelector('.opt-failMsg').value.trim();
+                    const condOperator = row.querySelector('.opt-condOperator').value || 'AND';
+
+                    // 条件
+                    const conditions = [];
+                    row.querySelectorAll('.cond-row').forEach(cr => {
+                        const t = cr.querySelector('.cond-type').value;
+                        if (!t) return;
+                        conditions.push({
+                            type: t,
+                            value: parseInt(cr.querySelector('.cond-val').value) || 0
+                        });
+                    });
+
+                    // 成功动作组
+                    const actions = [];
+                    row.querySelectorAll('.success-actions .action-row').forEach(ar => {
+                        const act = parseActionRow(ar);
+                        if (act) actions.push(act);
+                    });
+
+                    // 失败动作组
+                    const failActions = [];
+                    row.querySelectorAll('.fail-actions .action-row').forEach(ar => {
+                        const act = parseActionRow(ar);
+                        if (act) failActions.push(act);
+                    });
+
+                    options.push({
+                        text,
+                        probability,
+                        condOperator,
+                        conditions,
+                        actions,
+                        failActions,
+                        successMsg,
+                        failMsg
+                    });
+                });
+            }
+
+            if (id) {
+                const task = customCards.find(c => c.id === id);
+                if (task) {
+                    task.category = category;
+                    task.mode = mode;
+                    task.title = title;
+                    task.desc = desc;
+                    task.bpm = parseInt(document.getElementById('mTaskBpm').value) || 120;
+                    task.beats = parseInt(document.getElementById('mTaskBeats').value) || 60;
+                    task.timerType = document.getElementById('mTaskTimerType').value;
+                    task.duration = parseInt(document.getElementById('mTaskSec').value) || 30;
+                    task.options = options;
+                }
+            } else {
+                const newTask = {
+                    id: 'custom_' + Date.now(),
+                    category,
+                    mode,
+                    title,
+                    desc,
+                    bpm: parseInt(document.getElementById('mTaskBpm').value) || 120,
+                    beats: parseInt(document.getElementById('mTaskBeats').value) || 60,
+                    timerType: document.getElementById('mTaskTimerType').value,
+                    duration: parseInt(document.getElementById('mTaskSec').value) || 30,
+                    options,
+                    enabled: true
+                };
+                customCards.push(newTask);
+            }
+
+            saveCardsToStorage();
+            closeTaskModal();
+            renderTaskManager();
+        }
+
+        /* 从单个 .action-row 解析出动作对象（放在 saveCustomTask 外面！） */
+        function parseActionRow(ar) {
+            const type = ar.querySelector('.act-type').value;
+            if (!type) return null;
+
+            const param = parseInt(ar.querySelector('.act-param').value) || 1;
+            const forceCat = ar.querySelector('.act-forceCat').value || null;
+            const value = parseInt(ar.querySelector('.act-value').value) || 20;
+            const cat = ar.querySelector('.act-cat').value || 'ALL';
+
+            const act = {
+                type
+            };
+
+            if (type === 'BPM_BOOST' || type === 'TIMER_BOOST') {
+                act.value = value;
+                act.duration = param; // 持续张数
+                act.cat = cat;
+            } else if (type === 'DRAW') {
+                act.param = param;
+                if (forceCat) act.forceCat = forceCat;
+            } else if (type !== 'END_GAME') {
+                act.param = param;
+            }
+
+            return act;
+        }
+
+
+
+        function deleteCustomTask(id) {
+            if (confirm('确定要删除这张卡牌吗？')) {
+                customCards = customCards.filter(c => c.id !== id);
+                saveCardsToStorage();
+                renderTaskManager();
+            }
+        }
+
+        /* ========== STORAGE 写入统一入口 ========== */
+function saveCardsToStorage() {
+  try {
+    localStorage.setItem(CONFIG.STORAGE.CARDS, JSON.stringify(customCards));
+  } catch (e) {
+    console.error('[DARKBEAT] 保存卡牌失败', e);
+    if (e.name === 'QuotaExceededError') {
+      showAlert('存储空间不足', '卡牌数据过大，请删除部分自定义卡或清空历史后再试。');
+    } else {
+      showAlert('保存失败', '卡牌保存出错：' + (e.message || '未知错误'));
+    }
+  }
+}
+
+function saveHistoryToStorage() {
+  try {
+    localStorage.setItem(CONFIG.STORAGE.HISTORY, JSON.stringify(historyLogs));
+  } catch (e) {
+    console.error('[DARKBEAT] 保存历史失败', e);
+    if (e.name === 'QuotaExceededError') {
+      showAlert('存储空间不足', '历史战报过多，已自动丢弃最旧记录。');
+      historyLogs = historyLogs.slice(0, 20);
+      try { localStorage.setItem(CONFIG.STORAGE.HISTORY, JSON.stringify(historyLogs)); } catch (_) {}
+    }
+  }
+}
+    </script>
+</body>
+
+</html>
